@@ -30,6 +30,12 @@ export function setupWebSocket(wss: WebSocketServer) {
       ws.walletAddress = decoded.walletAddress;
       ws.isAlive = true;
 
+      // Ensure userId is set before proceeding
+      if (!ws.userId) {
+        ws.close(4001, 'Invalid token: missing userId');
+        return;
+      }
+
       // Add client to map
       if (!clients.has(ws.userId)) {
         clients.set(ws.userId, new Set());

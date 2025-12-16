@@ -365,7 +365,7 @@ export const jobResolvers = {
       });
     },
 
-    initiateDispute: async (_: any, { jobId, reason }: any, context: Context) => {
+    initiateDispute: async (_: any, { jobId, reason: _reason }: any, context: Context) => {
       if (!context.user) {
         throw new Error('Not authenticated');
       }

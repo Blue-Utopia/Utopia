@@ -14,7 +14,12 @@
     "test:contracts": "cd contracts && npx hardhat test",
     "test:backend": "cd backend && npm test",
     "deploy:local": "cd contracts && npx hardhat run scripts/deploy.js --network localhost",
-    "deploy:testnet": "cd contracts && npx hardhat run scripts/deploy.js --network sepolia"
+    "deploy:testnet": "cd contracts && npx hardhat run scripts/deploy.js --network sepolia",
+    "prisma:generate": "cd backend && npm run prisma:generate",
+    "prisma:migrate": "cd backend && npm run prisma:migrate",
+    "prisma:push": "cd backend && npm run prisma:push",
+    "prisma:studio": "cd backend && npm run prisma:studio",
+    "prisma:setup": "cd backend && npm run prisma:setup"
   },
   "keywords": [
     "blockchain",
