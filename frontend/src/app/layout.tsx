@@ -20,6 +20,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <style>{`
+          @media (max-width: 768px) {
+            .header-title {
+              display: none !important;
+            }
+            .header-menu {
+              display: none !important;
+            }
+          }
+        `}</style>
+      </head>
       <body className={inter.className}>
         <Providers>
           <div className="flex flex-col min-h-screen">

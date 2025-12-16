@@ -1,339 +1,319 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAccount } from 'wagmi';
+import { Layout, Menu, Button, Avatar, Badge, Dropdown, Space, Typography, Skeleton } from 'antd';
+import type { MenuProps } from 'antd';
 import { 
-  AppBar, 
-  Toolbar, 
-  Typography, 
-  Button, 
-  Box, 
-  Badge, 
-  IconButton,
-  Skeleton,
-  Container,
-  Avatar,
-  Menu,
-  MenuItem,
-  Divider,
-  ListItemIcon,
-  ListItemText,
-} from '@mui/material';
-import { 
-  Notifications, 
-  Mail, 
-  Settings, 
-  Help, 
-  Language, 
-  Logout,
-  Person,
-  Verified,
-} from '@mui/icons-material';
+  BellOutlined, 
+  MailOutlined, 
+  MessageOutlined,
+  SettingOutlined, 
+  LogoutOutlined, 
+  UserOutlined,
+  SearchOutlined,
+  CrownOutlined,
+  QuestionCircleOutlined,
+  GlobalOutlined,
+} from '@ant-design/icons';
 import { useAuth } from '@/hooks/useAuth';
+
+const { Header: AntHeader } = Layout;
+const { Text } = Typography;
 
 export function Header() {
   const { isConnected } = useAccount();
   const { isAuthenticated, user, logout, isLoading: authLoading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const menuOpen = Boolean(anchorEl);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const handleAvatarClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleLogout = () => {
-    handleMenuClose();
-    logout();
-    router.push('/');
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
+  const isHomePage = pathname === '/';
 
   const getUserDisplayName = () => {
     return user?.displayName || user?.username || user?.email?.split('@')[0] || 'User';
   };
 
+  const handleLogout = () => {
+    logout();
+    router.push('/');
+  };
+
+  const userMenuItems: MenuProps['items'] = [
+    {
+      key: 'user-info',
+      type: 'group',
+      label: (
+        <div style={{ padding: '8px 0', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Avatar
+            src={user?.avatar}
+            size={48}
+            style={{
+              backgroundColor: '#14A800',
+              flexShrink: 0,
+            }}
+          >
+            {!user?.avatar && getUserDisplayName().charAt(0).toUpperCase()}
+          </Avatar>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <Text strong style={{ display: 'block', fontSize: '15px', lineHeight: 1.4 }}>
+              {getUserDisplayName()}
+            </Text>
+            <Text type="secondary" style={{ fontSize: '13px', lineHeight: 1.4 }}>
+              {user?.email || 'View profile'}
+            </Text>
+          </div>
+        </div>
+      ),
+    },
+    { type: 'divider' },
+    {
+      key: 'premium',
+      label: (
+        <Link href="/premium" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <CrownOutlined style={{ color: '#faad14' }} />
+          <span>Try Premium</span>
+        </Link>
+      ),
+    },
+    {
+      key: 'profile',
+      label: (
+        <Link href="/profile/settings" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <SettingOutlined />
+          <span>Settings & Privacy</span>
+        </Link>
+      ),
+    },
+    {
+      key: 'help',
+      label: (
+        <Link href="/help" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <QuestionCircleOutlined />
+          <span>Help</span>
+        </Link>
+      ),
+    },
+    {
+      key: 'language',
+      label: (
+        <Link href="/language" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <GlobalOutlined />
+          <span>Language</span>
+        </Link>
+      ),
+    },
+    { type: 'divider' },
+    {
+      key: 'logout',
+      label: (
+        <div onClick={handleLogout} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, color: '#ef4444' }}>
+          <LogoutOutlined />
+          <span>Sign Out</span>
+        </div>
+      ),
+    },
+  ];
+
   return (
-    <AppBar position="sticky" sx={{ bgcolor: 'white', color: 'text.primary', boxShadow: 2 }}>
-      <Container maxWidth="xl">
-        <Toolbar sx={{ justifyContent: 'space-between', minHeight: '64px !important' }}>
-          {/* Logo */}
-          <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Box
-              sx={{
-                background: 'linear-gradient(135deg, #0ea5e9 0%, #a855f7 100%)',
-                color: 'white',
-                fontWeight: 'bold',
-                fontSize: '1.25rem',
-                px: 1.5,
-                py: 0.5,
-                borderRadius: 1,
+    <AntHeader
+      style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 1000,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 32px',
+        background: isHomePage ? 'rgba(15, 23, 42, 0.95)' : '#ffffff',
+        borderBottom: isHomePage ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #f0f0f0',
+        boxShadow: isHomePage ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : '0 1px 0 0 rgba(0, 0, 0, 0.05)',
+        height: 72,
+        backdropFilter: isHomePage ? 'blur(12px)' : 'blur(8px)',
+        backgroundColor: isHomePage ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+      }}
+    >
+      {/* Logo */}
+      <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div
+          style={{
+            background: 'linear-gradient(135deg, #14A800 0%, #5CB615 100%)',
+            color: 'white',
+            fontWeight: 700,
+            fontSize: '1.125rem',
+            padding: '6px 14px',
+            borderRadius: 8,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minWidth: 48,
+            height: 36,
+            boxShadow: '0 2px 4px rgba(20, 168, 0, 0.15)',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-1px)';
+            e.currentTarget.style.boxShadow = '0 4px 8px rgba(20, 168, 0, 0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 2px 4px rgba(20, 168, 0, 0.15)';
+          }}
+        >
+          DFM
+        </div>
+        <Text
+          strong
+          className="header-title"
+          style={{
+            fontSize: '1.125rem',
+            color: isHomePage ? 'white' : '#1a1a1a',
+            fontWeight: 600,
+            letterSpacing: '-0.01em',
+          }}
+        >
+          WorkFlow
+        </Text>
+      </Link>
+
+      {/* Navigation */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+        <Menu
+          mode="horizontal"
+          className="header-menu"
+          style={{
+            border: 'none',
+            background: 'transparent',
+            minWidth: 400,
+            fontWeight: 500,
+          }}
+          theme={isHomePage ? 'dark' : 'light'}
+          items={[
+            {
+              key: 'jobs',
+              label: <Link href="/jobs" style={{ textDecoration: 'none', color: 'inherit' }}>Find Work</Link>,
+            },
+            {
+              key: 'find-talent',
+              label: <Link href="/jobs" style={{ textDecoration: 'none', color: 'inherit' }}>Find Talent</Link>,
+            },
+            {
+              key: 'post-job',
+              label: <Link href="/post-job" style={{ textDecoration: 'none', color: 'inherit' }}>Post a Job</Link>,
+            },
+          ]}
+        />
+
+        {mounted && isConnected && (
+          <Space size={8} style={{ marginLeft: 8 }}>
+            <Badge count={0} showZero={false}>
+              <Button
+                type="text"
+                icon={<MessageOutlined style={{ fontSize: 18 }} />}
+                href="/messages"
+                style={{
+                  color: isHomePage ? 'rgba(255, 255, 255, 0.9)' : '#6b7280',
+                  width: 40,
+                  height: 40,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: 8,
+                }}
+              />
+            </Badge>
+            <Badge count={0} showZero={false}>
+              <Button
+                type="text"
+                icon={<BellOutlined style={{ fontSize: 18 }} />}
+                href="/notifications"
+                style={{
+                  color: isHomePage ? 'rgba(255, 255, 255, 0.9)' : '#6b7280',
+                  width: 40,
+                  height: 40,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: 8,
+                }}
+              />
+            </Badge>
+          </Space>
+        )}
+
+        {/* Auth Section */}
+        {!mounted || authLoading ? (
+          <Skeleton.Avatar active size={40} />
+        ) : isAuthenticated ? (
+          <Dropdown
+            menu={{ items: userMenuItems }}
+            placement="bottomRight"
+            trigger={['click']}
+            overlayStyle={{ minWidth: 240 }}
+          >
+            <div
+              style={{
+                cursor: 'pointer',
+                display: 'inline-block',
+                borderRadius: 8,
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => {
+                e.currentTarget.style.transform = 'scale(1.05)';
+              }}
+              onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => {
+                e.currentTarget.style.transform = 'scale(1)';
               }}
             >
-              DFM
-            </Box>
-            <Typography
-              variant="h6"
-              component="span"
-              sx={{
-                fontWeight: 'bold',
-                display: { xs: 'none', sm: 'inline' },
-                color: 'text.primary',
+              <Avatar
+                src={user?.avatar}
+                size={40}
+                style={{
+                  backgroundColor: '#14A800',
+                  border: '2px solid #f0f0f0',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {!user?.avatar && getUserDisplayName().charAt(0).toUpperCase()}
+              </Avatar>
+            </div>
+          </Dropdown>
+        ) : (
+          <Space size={12}>
+            <Button
+              type="text"
+              href="/signin"
+              style={{
+                fontWeight: 500,
+                color: '#6b7280',
+                height: 40,
+                padding: '0 16px',
               }}
             >
-              Freelance Marketplace
-            </Typography>
-          </Link>
-
-          {/* Navigation */}
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 3 }}>
-            <Button component={Link} href="/jobs" color="inherit" sx={{ fontWeight: 500 }}>
-              Find Work
+              Sign In
             </Button>
-            <Button component={Link} href="/post-job" color="inherit" sx={{ fontWeight: 500 }}>
-              Post Job
+            <Button
+              type="primary"
+              href="/signup"
+              style={{
+                borderRadius: 8,
+                fontWeight: 600,
+                height: 40,
+                padding: '0 20px',
+                boxShadow: '0 2px 4px rgba(20, 168, 0, 0.15)',
+              }}
+            >
+              Sign Up
             </Button>
-            <Button component={Link} href="/my-jobs" color="inherit" sx={{ fontWeight: 500 }}>
-              My Jobs
-            </Button>
-            {mounted && isConnected && (
-              <>
-                <IconButton component={Link} href="/messages" color="inherit">
-                  <Badge badgeContent={0} color="error">
-                    <Mail />
-                  </Badge>
-                </IconButton>
-                <IconButton component={Link} href="/notifications" color="inherit">
-                  <Badge badgeContent={0} color="error">
-                    <Notifications />
-                  </Badge>
-                </IconButton>
-              </>
-            )}
-          </Box>
-
-          {/* Auth Buttons */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            {!mounted || authLoading ? (
-              <>
-                <Skeleton variant="rectangular" width={64} height={32} sx={{ borderRadius: 1 }} />
-                <Skeleton variant="circular" width={40} height={40} />
-              </>
-            ) : isAuthenticated ? (
-              <>
-                <IconButton
-                  onClick={handleAvatarClick}
-                  sx={{ p: 0 }}
-                  aria-label="account menu"
-                  aria-controls={menuOpen ? 'account-menu' : undefined}
-                  aria-haspopup="true"
-                  aria-expanded={menuOpen ? 'true' : undefined}
-                >
-                  <Avatar
-                    src={user?.avatar || undefined}
-                    alt={getUserDisplayName()}
-                    sx={{
-                      width: 40,
-                      height: 40,
-                      bgcolor: 'primary.main',
-                      cursor: 'pointer',
-                      '&:hover': {
-                        boxShadow: 2,
-                      },
-                    }}
-                  >
-                    {!user?.avatar && getUserDisplayName().charAt(0).toUpperCase()}
-                  </Avatar>
-                </IconButton>
-                <Menu
-                  anchorEl={anchorEl}
-                  id="account-menu"
-                  open={menuOpen}
-                  onClose={handleMenuClose}
-                  onClick={handleMenuClose}
-                  PaperProps={{
-                    elevation: 3,
-                    sx: {
-                      overflow: 'visible',
-                      filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-                      mt: 1.5,
-                      minWidth: 280,
-                      '& .MuiAvatar-root': {
-                        width: 56,
-                        height: 56,
-                        ml: -0.5,
-                        mr: 1,
-                      },
-                      '&:before': {
-                        content: '""',
-                        display: 'block',
-                        position: 'absolute',
-                        top: 0,
-                        right: 14,
-                        width: 10,
-                        height: 10,
-                        bgcolor: 'background.paper',
-                        transform: 'translateY(-50%) rotate(45deg)',
-                        zIndex: 0,
-                      },
-                    },
-                  }}
-                  transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                  anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-                >
-                  {/* User Info Section */}
-                  <Box sx={{ px: 2, py: 1.5 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
-                      <Avatar
-                        src={user?.avatar || undefined}
-                        alt={getUserDisplayName()}
-                        sx={{
-                          width: 56,
-                          height: 56,
-                          bgcolor: 'primary.main',
-                        }}
-                      >
-                        {!user?.avatar && getUserDisplayName().charAt(0).toUpperCase()}
-                      </Avatar>
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography variant="subtitle1" fontWeight="bold" noWrap>
-                          {getUserDisplayName()}
-                        </Typography>
-                        {user?.role && (
-                          <Typography variant="body2" color="text.secondary" noWrap>
-                            {user.role === 'CLIENT' ? 'Client' : user.role === 'DEVELOPER' ? 'Developer' : 'Freelancer'}
-                          </Typography>
-                        )}
-                      </Box>
-                    </Box>
-                    <Box sx={{ display: 'flex', gap: 1, mt: 1.5 }}>
-                      <Button
-                        component={Link}
-                        href="/profile/settings"
-                        variant="outlined"
-                        size="small"
-                        fullWidth
-                        sx={{ fontSize: '0.75rem' }}
-                      >
-                        View profile
-                      </Button>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        fullWidth
-                        sx={{ fontSize: '0.75rem' }}
-                        startIcon={<Verified sx={{ fontSize: 16 }} />}
-                      >
-                        Verify
-                      </Button>
-                    </Box>
-                  </Box>
-                  <Divider />
-                  
-                  {/* Account Section */}
-                  <Box sx={{ px: 1, py: 0.5 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ px: 2, py: 0.5, display: 'block' }}>
-                      Account
-                    </Typography>
-                    <MenuItem component={Link} href="/premium">
-                      <ListItemIcon>
-                        <Box sx={{ width: 20, height: 20, bgcolor: 'warning.main', borderRadius: 0.5 }} />
-                      </ListItemIcon>
-                      <ListItemText primary="Try Premium for free" />
-                    </MenuItem>
-                    <MenuItem component={Link} href="/profile/settings">
-                      <ListItemIcon>
-                        <Settings fontSize="small" />
-                      </ListItemIcon>
-                      <ListItemText primary="Settings & Privacy" />
-                    </MenuItem>
-                    <MenuItem component={Link} href="/help">
-                      <ListItemIcon>
-                        <Help fontSize="small" />
-                      </ListItemIcon>
-                      <ListItemText primary="Help" />
-                    </MenuItem>
-                    <MenuItem>
-                      <ListItemIcon>
-                        <Language fontSize="small" />
-                      </ListItemIcon>
-                      <ListItemText primary="Language" />
-                    </MenuItem>
-                  </Box>
-                  <Divider />
-                  
-                  {/* Manage Section */}
-                  <Box sx={{ px: 1, py: 0.5 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ px: 2, py: 0.5, display: 'block' }}>
-                      Manage
-                    </Typography>
-                    <MenuItem component={Link} href="/my-jobs">
-                      <ListItemIcon>
-                        <Person fontSize="small" />
-                      </ListItemIcon>
-                      <ListItemText primary="Posts & Activity" />
-                    </MenuItem>
-                    <MenuItem component={Link} href="/post-job">
-                      <ListItemIcon>
-                        <Person fontSize="small" />
-                      </ListItemIcon>
-                      <ListItemText primary="Job Posting Account" />
-                    </MenuItem>
-                  </Box>
-                  <Divider />
-                  
-                  {/* Sign Out */}
-                  <MenuItem onClick={handleLogout}>
-                    <ListItemIcon>
-                      <Logout fontSize="small" />
-                    </ListItemIcon>
-                    <ListItemText primary="Sign Out" />
-                  </MenuItem>
-                </Menu>
-              </>
-            ) : (
-              <>
-                <Button
-                  component={Link}
-                  href="/signin"
-                  color="inherit"
-                  sx={{ fontSize: '0.875rem' }}
-                >
-                  Sign In
-                </Button>
-                <Button
-                  component={Link}
-                  href="/signup"
-                  variant="contained"
-                  sx={{ fontSize: '0.875rem' }}
-                >
-                  Sign Up
-                </Button>
-              </>
-            )}
-          </Box>
-        </Toolbar>
-      </Container>
-    </AppBar>
+          </Space>
+        )}
+      </div>
+    </AntHeader>
   );
 }
-

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
+import { LazySection } from '@/components/LazySection';
 
 export default function MyJobsPage() {
   const { isAuthenticated } = useAuth();
@@ -81,8 +82,9 @@ export default function MyJobsPage() {
 
           <div className="p-6">
             {activeTab === 'client' && (
-              <div className="space-y-4">
-                {myJobsAsClient.map((job) => (
+              <LazySection minHeight={200}>
+                <div className="space-y-4">
+                  {myJobsAsClient.map((job) => (
                   <div key={job.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
@@ -106,21 +108,23 @@ export default function MyJobsPage() {
                       </div>
                     </div>
                   </div>
-                ))}
-                {myJobsAsClient.length === 0 && (
-                  <div className="text-center py-12">
-                    <p className="text-gray-500 mb-4">You haven't posted any jobs yet.</p>
-                    <Link href="/post-job" className="btn btn-primary">
-                      Post Your First Job
-                    </Link>
-                  </div>
-                )}
-              </div>
+                  ))}
+                  {myJobsAsClient.length === 0 && (
+                    <div className="text-center py-12">
+                      <p className="text-gray-500 mb-4">You haven't posted any jobs yet.</p>
+                      <Link href="/post-job" className="btn btn-primary">
+                        Post Your First Job
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </LazySection>
             )}
 
             {activeTab === 'developer' && (
-              <div className="space-y-4">
-                {myJobsAsDeveloper.map((job) => (
+              <LazySection minHeight={200}>
+                <div className="space-y-4">
+                  {myJobsAsDeveloper.map((job) => (
                   <div key={job.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
@@ -144,16 +148,17 @@ export default function MyJobsPage() {
                       </div>
                     </div>
                   </div>
-                ))}
-                {myJobsAsDeveloper.length === 0 && (
-                  <div className="text-center py-12">
-                    <p className="text-gray-500 mb-4">You haven't been hired for any jobs yet.</p>
-                    <Link href="/jobs" className="btn btn-primary">
-                      Browse Available Jobs
-                    </Link>
-                  </div>
-                )}
-              </div>
+                  ))}
+                  {myJobsAsDeveloper.length === 0 && (
+                    <div className="text-center py-12">
+                      <p className="text-gray-500 mb-4">You haven't been hired for any jobs yet.</p>
+                      <Link href="/jobs" className="btn btn-primary">
+                        Browse Available Jobs
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </LazySection>
             )}
           </div>
         </div>

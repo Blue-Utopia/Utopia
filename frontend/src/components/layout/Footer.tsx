@@ -1,150 +1,214 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Box, Container, Typography, IconButton, Divider, Grid } from '@mui/material';
-import { GitHub, Twitter, Telegram } from '@mui/icons-material';
+import { Typography, Row, Col, Space } from 'antd';
+import { GithubOutlined, TwitterOutlined, MessageOutlined, SendOutlined } from '@ant-design/icons';
+
+const { Title, Text } = Typography;
 
 export function Footer() {
-  return (
-    <Box component="footer" sx={{ bgcolor: 'grey.900', color: 'white', py: 6 }}>
-      <Container maxWidth="lg">
-        <Grid container spacing={4}>
-          {/* About */}
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              About
-            </Typography>
-            <Typography variant="body2" color="grey.400">
-              A decentralized freelance marketplace powered by blockchain technology. Work freely, get paid instantly.
-            </Typography>
-          </Grid>
+  const [isMobile, setIsMobile] = useState(false);
 
-          {/* For Freelancers */}
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              For Freelancers
-            </Typography>
-            <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>
-              {[
-                { href: '/jobs', label: 'Find Work' },
-                { href: '/how-it-works', label: 'How It Works' },
-                { href: '/skills', label: 'Skill Tests' },
-                { href: '/success-stories', label: 'Success Stories' },
-              ].map((item) => (
-                <li key={item.href}>
-                  <Typography
-                    component={Link}
-                    href={item.href}
-                    variant="body2"
-                    sx={{ color: 'grey.400', textDecoration: 'none', '&:hover': { color: 'white' } }}
-                  >
-                    {item.label}
-                  </Typography>
-                </li>
-              ))}
-            </Box>
-          </Grid>
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  return (
+    <footer
+      style={{
+        background: '#1e293b',
+        color: 'white',
+        padding: '64px 24px 32px',
+        marginTop: 0,
+      }}
+    >
+      <div style={{ maxWidth: 1400, margin: '0 auto' }}>
+        <Row gutter={[48, 48]}>
+          {/* About */}
+          <Col span={24} lg={{ span: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+              <div
+                style={{
+                  background: 'linear-gradient(135deg, #14A800 0%, #5CB615 100%)',
+                  color: 'white',
+                  fontWeight: 700,
+                  fontSize: '1.125rem',
+                  padding: '6px 14px',
+                  borderRadius: 8,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minWidth: 48,
+                  height: 36,
+                }}
+              >
+                WF
+              </div>
+              <Text strong style={{ color: 'white', fontSize: '1.125rem', fontWeight: 600 }}>
+                WorkFlow
+              </Text>
+            </div>
+            <Text style={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.7, display: 'block', fontSize: '14px' }}>
+              Connect with top talent and find amazing projects. Build your career with us.
+            </Text>
+          </Col>
 
           {/* For Clients */}
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
+          <Col span={24} sm={{ span: 12 }} lg={{ span: 6 }}>
+            <Title level={5} style={{ color: 'white', marginBottom: 20, fontWeight: 600 }}>
               For Clients
-            </Typography>
-            <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>
+            </Title>
+            <Space direction="vertical" size="small" style={{ width: '100%' }}>
               {[
+                { href: '/jobs', label: 'Find Talent' },
                 { href: '/post-job', label: 'Post a Job' },
-                { href: '/browse-talent', label: 'Browse Talent' },
                 { href: '/enterprise', label: 'Enterprise' },
-                { href: '/pricing', label: 'Pricing' },
               ].map((item) => (
-                <li key={item.href}>
-                  <Typography
-                    component={Link}
-                    href={item.href}
-                    variant="body2"
-                    sx={{ color: 'grey.400', textDecoration: 'none', '&:hover': { color: 'white' } }}
-                  >
-                    {item.label}
-                  </Typography>
-                </li>
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  style={{
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    textDecoration: 'none',
+                    fontSize: '14px',
+                    display: 'block',
+                    transition: 'color 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#14A800')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)')}
+                >
+                  {item.label}
+                </Link>
               ))}
-            </Box>
-          </Grid>
+            </Space>
+          </Col>
 
-          {/* Support */}
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              Support
-            </Typography>
-            <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>
+          {/* For Freelancers */}
+          <Col span={24} sm={{ span: 12 }} lg={{ span: 6 }}>
+            <Title level={5} style={{ color: 'white', marginBottom: 20, fontWeight: 600 }}>
+              For Freelancers
+            </Title>
+            <Space direction="vertical" size="small" style={{ width: '100%' }}>
               {[
-                { href: '/help', label: 'Help Center' },
-                { href: '/docs', label: 'Documentation' },
-                { href: '/faq', label: 'FAQ' },
-                { href: '/contact', label: 'Contact Us' },
+                { href: '/jobs', label: 'Find Work' },
+                { href: '/resources', label: 'Resources' },
+                { href: '/community', label: 'Community' },
               ].map((item) => (
-                <li key={item.href}>
-                  <Typography
-                    component={Link}
-                    href={item.href}
-                    variant="body2"
-                    sx={{ color: 'grey.400', textDecoration: 'none', '&:hover': { color: 'white' } }}
-                  >
-                    {item.label}
-                  </Typography>
-                </li>
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  style={{
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    textDecoration: 'none',
+                    fontSize: '14px',
+                    display: 'block',
+                    transition: 'color 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#14A800')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)')}
+                >
+                  {item.label}
+                </Link>
               ))}
-            </Box>
-          </Grid>
-        </Grid>
+            </Space>
+          </Col>
 
-        {/* Social Links & Copyright */}
-        <Divider sx={{ borderColor: 'grey.800', my: 4 }} />
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <IconButton
-              component="a"
-              href="https://github.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              sx={{ color: 'grey.400', '&:hover': { color: 'white' } }}
+          {/* Company */}
+          <Col span={24} sm={{ span: 12 }} lg={{ span: 6 }}>
+            <Title level={5} style={{ color: 'white', marginBottom: 20, fontWeight: 600 }}>
+              Company
+            </Title>
+            <Space direction="vertical" size="small" style={{ width: '100%' }}>
+              {[
+                { href: '/about', label: 'About Us' },
+                { href: '/careers', label: 'Careers' },
+                { href: '/contact', label: 'Contact' },
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  style={{
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    textDecoration: 'none',
+                    fontSize: '14px',
+                    display: 'block',
+                    transition: 'color 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#14A800')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)')}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </Space>
+          </Col>
+        </Row>
+
+        {/* Copyright & Links */}
+        <div
+          style={{
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+            marginTop: 48,
+            paddingTop: 32,
+            display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 16,
+          }}
+        >
+          <Text style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '14px' }}>
+            © 2024 WorkFlow. All rights reserved.
+          </Text>
+          <Space size={24}>
+            <Link
+              href="/terms"
+              style={{
+                color: 'rgba(255, 255, 255, 0.7)',
+                textDecoration: 'none',
+                fontSize: '14px',
+                transition: 'color 0.2s ease',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#14A800')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)')}
             >
-              <GitHub />
-            </IconButton>
-            <IconButton
-              component="a"
-              href="https://twitter.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              sx={{ color: 'grey.400', '&:hover': { color: 'white' } }}
+              Terms
+            </Link>
+            <Link
+              href="/privacy"
+              style={{
+                color: 'rgba(255, 255, 255, 0.7)',
+                textDecoration: 'none',
+                fontSize: '14px',
+                transition: 'color 0.2s ease',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#14A800')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)')}
             >
-              <Twitter />
-            </IconButton>
-            <IconButton
-              component="a"
-              href="https://discord.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              sx={{ color: 'grey.400', '&:hover': { color: 'white' } }}
+              Privacy
+            </Link>
+            <Link
+              href="/cookies"
+              style={{
+                color: 'rgba(255, 255, 255, 0.7)',
+                textDecoration: 'none',
+                fontSize: '14px',
+                transition: 'color 0.2s ease',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#14A800')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)')}
             >
-              <Box component="span" sx={{ fontSize: '1.5rem' }}>D</Box>
-            </IconButton>
-            <IconButton
-              component="a"
-              href="https://telegram.org"
-              target="_blank"
-              rel="noopener noreferrer"
-              sx={{ color: 'grey.400', '&:hover': { color: 'white' } }}
-            >
-              <Telegram />
-            </IconButton>
-          </Box>
-          <Typography variant="body2" color="grey.400">
-            © 2024 Decentralized Freelance Marketplace. All rights reserved.
-          </Typography>
-        </Box>
-      </Container>
-    </Box>
+              Cookies
+            </Link>
+          </Space>
+        </div>
+      </div>
+    </footer>
   );
 }
-
