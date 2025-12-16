@@ -5,28 +5,17 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import toast from 'react-hot-toast';
-import {
-  Container,
-  Box,
-  Card,
-  CardContent,
-  TextField,
-  Button,
-  Typography,
-  Checkbox,
-  FormControlLabel,
-  Divider,
-  CircularProgress,
-} from '@mui/material';
+import { Layout, Card, Form, Input, Button, Typography, Divider, Space, Spin } from 'antd';
+import { UserOutlined, LockOutlined } from '@ant-design/icons';
+
+const { Content } = Layout;
+const { Title, Text } = Typography;
 
 export default function SignInPage() {
   const router = useRouter();
   const { signin, isAuthenticated, isLoading } = useAuth();
+  const [form] = Form.useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -35,147 +24,115 @@ export default function SignInPage() {
     }
   }, [isAuthenticated, isLoading, router]);
 
-  // Show loading state while checking auth
-  if (isLoading) {
-    return (
-      <Box
-        sx={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          bgcolor: 'grey.50',
-        }}
-      >
-        <Box sx={{ textAlign: 'center' }}>
-          <CircularProgress />
-          <Typography sx={{ mt: 2, color: 'text.secondary' }}>Loading...</Typography>
-        </Box>
-      </Box>
-    );
-  }
-
-  // Don't render form if authenticated (will redirect)
-  if (isAuthenticated) {
-    return null;
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (values: { email: string; password: string }) => {
     setIsSubmitting(true);
-
     try {
-      await signin(formData.email, formData.password);
+      await signin(values.email, values.password);
       router.push('/');
-    } catch (error) {
-      // Error is already handled in useAuth hook
+    } catch (error: any) {
+      toast.error(error.message || 'Sign in failed');
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  if (isLoading) {
+    return (
+      <Layout style={{ minHeight: '100vh', background: '#F7F7F7' }}>
+        <Content style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Spin size="large" />
+        </Content>
+      </Layout>
+    );
+  }
+
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        py: 8,
-        bgcolor: 'grey.50',
-      }}
-    >
-      <Container maxWidth="sm">
-        <Box sx={{ mb: 4, textAlign: 'center' }}>
-          <Typography variant="h4" component="h1" gutterBottom fontWeight="bold">
-            Sign in to your account
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Or{' '}
-            <Link href="/signup" style={{ color: 'inherit', fontWeight: 500 }}>
-              create a new account
-            </Link>
-          </Typography>
-        </Box>
+    <Layout style={{ minHeight: '100vh', background: '#F7F7F7' }}>
+      <Content
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '40px 24px',
+        }}
+      >
+        <Card
+          style={{
+            width: '100%',
+            maxWidth: 440,
+            borderRadius: 12,
+            border: '1px solid #EEEEEE',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+          }}
+        >
+          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+            <Title level={2} style={{ marginBottom: 8, fontWeight: 700 }}>
+              Sign In
+            </Title>
+            <Text type="secondary">Welcome back! Please sign in to your account.</Text>
+          </div>
 
-        <Card>
-          <CardContent sx={{ p: 4 }}>
-            <form onSubmit={handleSubmit}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                <TextField
-                  id="email"
-                  name="email"
-                  type="email"
-                  label="Email address"
-                  autoComplete="email"
-                  required
-                  fullWidth
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="you@example.com"
-                />
-
-                <TextField
-                  id="password"
-                  name="password"
-                  type="password"
-                  label="Password"
-                  autoComplete="current-password"
-                  required
-                  fullWidth
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  placeholder="Enter your password"
-                />
-
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <FormControlLabel
-                    control={<Checkbox />}
-                    label="Remember me"
-                  />
-                  <Typography
-                    component="a"
-                    href="#"
-                    variant="body2"
-                    sx={{ color: 'primary.main', fontWeight: 500, textDecoration: 'none' }}
-                  >
-                    Forgot your password?
-                  </Typography>
-                </Box>
-
-                <Button
-                  type="submit"
-                  variant="contained"
-                  fullWidth
-                  size="large"
-                  disabled={isSubmitting}
-                  sx={{ py: 1.5 }}
-                >
-                  {isSubmitting ? 'Signing in...' : 'Sign in'}
-                </Button>
-              </Box>
-            </form>
-
-            <Divider sx={{ my: 3 }}>
-              <Typography variant="body2" color="text.secondary">
-                Or continue with
-              </Typography>
-            </Divider>
-
-            <Button
-              component={Link}
-              href="/"
-              variant="outlined"
-              fullWidth
-              sx={{ py: 1.5 }}
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleSubmit}
+            size="large"
+          >
+            <Form.Item
+              name="email"
+              rules={[
+                { required: true, message: 'Please enter your email' },
+                { type: 'email', message: 'Please enter a valid email' },
+              ]}
             >
-              Connect Wallet
-            </Button>
-          </CardContent>
+              <Input
+                prefix={<UserOutlined />}
+                placeholder="Email"
+                style={{ borderRadius: 8 }}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="password"
+              rules={[{ required: true, message: 'Please enter your password' }]}
+            >
+              <Input.Password
+                prefix={<LockOutlined />}
+                placeholder="Password"
+                style={{ borderRadius: 8 }}
+              />
+            </Form.Item>
+
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                block
+                loading={isSubmitting}
+                style={{
+                  borderRadius: 8,
+                  height: 48,
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                }}
+              >
+                Sign In
+              </Button>
+            </Form.Item>
+          </Form>
+
+          <Divider>Or</Divider>
+
+          <div style={{ textAlign: 'center' }}>
+            <Text type="secondary">
+              Don't have an account?{' '}
+              <Link href="/signup" style={{ color: '#14A800', fontWeight: 600 }}>
+                Sign Up
+              </Link>
+            </Text>
+          </div>
         </Card>
-      </Container>
-    </Box>
+      </Content>
+    </Layout>
   );
 }
-
-

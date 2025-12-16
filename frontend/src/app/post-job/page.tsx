@@ -4,43 +4,21 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import toast from 'react-hot-toast';
-import {
-  Container,
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  TextField,
-  Button,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Select,
-  Alert,
-  Grid,
-} from '@mui/material';
+import { Layout, Typography, Card, Form, Input, Select, Button, Row, Col, Alert, InputNumber, DatePicker } from 'antd';
+import dayjs from 'dayjs';
+
+const { Content } = Layout;
+const { Title, Paragraph } = Typography;
+const { TextArea } = Input;
+const { Option } = Select;
 
 export default function PostJobPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const [form] = Form.useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    category: 'development',
-    budget: '',
-    currency: 'USDC',
-    paymentToken: '0x...', // Will be set based on currency
-    estimatedDuration: '',
-    deadline: '',
-    tags: '',
-    requiredSkills: '',
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSubmit = async (values: any) => {
     if (!isAuthenticated) {
       toast.error('Please connect your wallet and authenticate');
       return;
@@ -50,7 +28,7 @@ export default function PostJobPage() {
 
     try {
       // TODO: Submit to GraphQL API
-      console.log('Submitting job:', formData);
+      console.log('Submitting job:', values);
 
       toast.success('Job posted successfully!');
       router.push('/my-jobs');
@@ -63,153 +41,203 @@ export default function PostJobPage() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50', py: 4 }}>
-      <Container maxWidth="md">
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h3" component="h1" fontWeight="bold" gutterBottom>
+    <Layout style={{ minHeight: '100vh', background: '#F7F7F7' }}>
+      <Content style={{ padding: '40px 24px', maxWidth: 800, margin: '0 auto', width: '100%' }}>
+        <div style={{ marginBottom: 32 }}>
+          <Title level={2} style={{ marginBottom: 8, fontWeight: 700, color: '#222222' }}>
             Post a Job
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
+          </Title>
+          <Paragraph style={{ fontSize: '1.125rem', color: '#6B6B6B', margin: 0 }}>
             Find the perfect freelancer for your project.
-          </Typography>
-        </Box>
+          </Paragraph>
+        </div>
 
-        <Card>
-          <CardContent>
-            <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              {/* Title */}
-              <TextField
-                label="Job Title"
-                required
-                fullWidth
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+        <Card style={{ borderRadius: 12, border: '1px solid #EEEEEE' }}>
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleSubmit}
+            initialValues={{
+              category: 'development',
+              currency: 'USDC',
+            }}
+          >
+            {/* Title */}
+            <Form.Item
+              name="title"
+              label="Job Title"
+              rules={[{ required: true, message: 'Please enter a job title' }]}
+            >
+              <Input
+                size="large"
                 placeholder="e.g., Full Stack Developer for DeFi Project"
+                style={{ borderRadius: 8 }}
               />
+            </Form.Item>
 
-              {/* Description */}
-              <TextField
-                label="Description"
-                required
-                fullWidth
-                multiline
+            {/* Description */}
+            <Form.Item
+              name="description"
+              label="Description"
+              rules={[{ required: true, message: 'Please enter a description' }]}
+            >
+              <TextArea
                 rows={6}
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Describe your project in detail..."
+                style={{ borderRadius: 8 }}
               />
+            </Form.Item>
 
-              {/* Category */}
-              <FormControl fullWidth>
-                <InputLabel>Category</InputLabel>
-                <Select
-                  required
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  label="Category"
+            {/* Category */}
+            <Form.Item
+              name="category"
+              label="Category"
+              rules={[{ required: true, message: 'Please select a category' }]}
+            >
+              <Select size="large" style={{ borderRadius: 8 }}>
+                <Option value="development">Development</Option>
+                <Option value="design">Design</Option>
+                <Option value="security">Security</Option>
+                <Option value="marketing">Marketing</Option>
+                <Option value="writing">Writing</Option>
+              </Select>
+            </Form.Item>
+
+            {/* Budget and Currency */}
+            <Row gutter={16}>
+              <Col span={24} sm={{ span: 12 }}>
+                <Form.Item
+                  name="budget"
+                  label="Budget (USD)"
+                  rules={[{ required: true, message: 'Please enter a budget' }]}
                 >
-                  <MenuItem value="development">Development</MenuItem>
-                  <MenuItem value="design">Design</MenuItem>
-                  <MenuItem value="security">Security</MenuItem>
-                  <MenuItem value="marketing">Marketing</MenuItem>
-                  <MenuItem value="writing">Writing</MenuItem>
-                </Select>
-              </FormControl>
-
-              {/* Budget and Currency */}
-              <Grid container spacing={2}>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <TextField
-                    label="Budget (USD)"
-                    type="number"
-                    required
-                    fullWidth
-                    inputProps={{ min: 1 }}
-                    value={formData.budget}
-                    onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
+                  <InputNumber
+                    size="large"
+                    min={1}
                     placeholder="5000"
+                    style={{ width: '100%', borderRadius: 8 }}
                   />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <FormControl fullWidth>
-                    <InputLabel>Payment Currency</InputLabel>
-                    <Select
-                      required
-                      value={formData.currency}
-                      onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                      label="Payment Currency"
-                    >
-                      <MenuItem value="USDC">USDC</MenuItem>
-                      <MenuItem value="USDT">USDT</MenuItem>
-                      <MenuItem value="ETH">ETH</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-              </Grid>
+                </Form.Item>
+              </Col>
+              <Col span={24} sm={{ span: 12 }}>
+                <Form.Item
+                  name="currency"
+                  label="Payment Currency"
+                  rules={[{ required: true, message: 'Please select a currency' }]}
+                >
+                  <Select size="large" style={{ borderRadius: 8 }}>
+                    <Option value="USDC">USDC</Option>
+                    <Option value="USDT">USDT</Option>
+                    <Option value="ETH">ETH</Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
 
-              {/* Duration and Deadline */}
-              <Grid container spacing={2}>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <TextField
-                    label="Estimated Duration (days)"
-                    type="number"
-                    fullWidth
-                    inputProps={{ min: 1 }}
-                    value={formData.estimatedDuration}
-                    onChange={(e) => setFormData({ ...formData, estimatedDuration: e.target.value })}
+            {/* Duration and Deadline */}
+            <Row gutter={16}>
+              <Col span={24} sm={{ span: 12 }}>
+                <Form.Item
+                  name="estimatedDuration"
+                  label="Estimated Duration (days)"
+                >
+                  <InputNumber
+                    size="large"
+                    min={1}
                     placeholder="30"
+                    style={{ width: '100%', borderRadius: 8 }}
                   />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <TextField
-                    label="Deadline"
-                    type="date"
-                    fullWidth
-                    InputLabelProps={{ shrink: true }}
-                    value={formData.deadline}
-                    onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+                </Form.Item>
+              </Col>
+              <Col span={24} sm={{ span: 12 }}>
+                <Form.Item
+                  name="deadline"
+                  label="Deadline"
+                >
+                  <DatePicker
+                    size="large"
+                    style={{ width: '100%', borderRadius: 8 }}
+                    format="YYYY-MM-DD"
                   />
-                </Grid>
-              </Grid>
+                </Form.Item>
+              </Col>
+            </Row>
 
-              {/* Required Skills */}
-              <TextField
-                label="Required Skills"
-                required
-                fullWidth
-                value={formData.requiredSkills}
-                onChange={(e) => setFormData({ ...formData, requiredSkills: e.target.value })}
+            {/* Required Skills */}
+            <Form.Item
+              name="requiredSkills"
+              label="Required Skills"
+              rules={[{ required: true, message: 'Please enter required skills' }]}
+              extra="Separate skills with commas"
+            >
+              <Input
+                size="large"
                 placeholder="React, Node.js, Solidity (comma separated)"
-                helperText="Separate skills with commas"
+                style={{ borderRadius: 8 }}
               />
+            </Form.Item>
 
-              {/* Tags */}
-              <TextField
-                label="Tags"
-                fullWidth
-                value={formData.tags}
-                onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+            {/* Tags */}
+            <Form.Item
+              name="tags"
+              label="Tags"
+            >
+              <Input
+                size="large"
                 placeholder="web3, defi, frontend (comma separated)"
+                style={{ borderRadius: 8 }}
               />
+            </Form.Item>
 
-              {/* Info */}
-              <Alert severity="info">
-                <strong>Note:</strong> After posting, you'll need to deposit 50% of the budget into escrow before work can begin.
-              </Alert>
+            {/* Info */}
+            <Alert
+              message="Note"
+              description="After posting, you'll need to deposit 50% of the budget into escrow before work can begin."
+              type="info"
+              showIcon
+              style={{ marginBottom: 24, borderRadius: 8 }}
+            />
 
-              {/* Submit Button */}
-              <Box sx={{ display: 'flex', gap: 2, pt: 2 }}>
-                <Button type="submit" variant="contained" disabled={isSubmitting} sx={{ flex: 1 }}>
-                  {isSubmitting ? 'Posting...' : 'Post Job'}
-                </Button>
-                <Button type="button" variant="outlined" onClick={() => router.back()}>
-                  Cancel
-                </Button>
-              </Box>
-            </Box>
-          </CardContent>
+            {/* Submit Button */}
+            <Form.Item>
+              <Row gutter={16}>
+                <Col span={24} sm={{ span: 16 }}>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    size="large"
+                    loading={isSubmitting}
+                    block
+                    style={{
+                      borderRadius: 8,
+                      fontSize: '1.125rem',
+                      fontWeight: 600,
+                      height: 48,
+                    }}
+                  >
+                    {isSubmitting ? 'Posting...' : 'Post Job'}
+                  </Button>
+                </Col>
+                <Col span={24} sm={{ span: 8 }}>
+                  <Button
+                    size="large"
+                    block
+                    onClick={() => router.back()}
+                    style={{
+                      borderRadius: 8,
+                      fontSize: '1.125rem',
+                      fontWeight: 600,
+                      height: 48,
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </Col>
+              </Row>
+            </Form.Item>
+          </Form>
         </Card>
-      </Container>
-    </Box>
+      </Content>
+    </Layout>
   );
 }

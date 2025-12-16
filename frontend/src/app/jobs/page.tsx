@@ -2,24 +2,13 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import {
-  Container,
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  TextField,
-  Button,
-  Chip,
-  InputAdornment,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Paper,
-  Grid,
-} from '@mui/material';
-import { Search, FilterList } from '@mui/icons-material';
+import { Layout, Typography, Card, Input, Select, Button, Tag, Row, Col, Space, Empty } from 'antd';
+import { SearchOutlined, FilterOutlined } from '@ant-design/icons';
+import { LazySection } from '@/components/LazySection';
+
+const { Content } = Layout;
+const { Title, Paragraph, Text } = Typography;
+const { Option } = Select;
 
 export default function JobsPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -63,127 +52,179 @@ export default function JobsPage() {
   ];
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50', py: 4 }}>
-      <Container maxWidth="lg">
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h3" component="h1" fontWeight="bold" gutterBottom>
+    <Layout style={{ minHeight: '100vh', background: '#F7F7F7' }}>
+      <Content style={{ padding: '40px 24px', maxWidth: 1200, margin: '0 auto', width: '100%' }}>
+        <div style={{ marginBottom: 32 }}>
+          <Title level={2} style={{ marginBottom: 8, fontWeight: 700, color: '#222222' }}>
             Find Work
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
+          </Title>
+          <Paragraph style={{ fontSize: '1.125rem', color: '#6B6B6B', margin: 0 }}>
             Browse available jobs and submit proposals to get hired.
-          </Typography>
-        </Box>
+          </Paragraph>
+        </div>
 
         {/* Search and Filter */}
-        <Card sx={{ mb: 3 }}>
-          <CardContent>
-            <Grid container spacing={2} alignItems="center">
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  placeholder="Search jobs..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Search />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <FormControl fullWidth>
-                  <InputLabel>Category</InputLabel>
-                  <Select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    label="Category"
-                  >
-                    <MenuItem value="all">All Categories</MenuItem>
-                    <MenuItem value="development">Development</MenuItem>
-                    <MenuItem value="design">Design</MenuItem>
-                    <MenuItem value="security">Security</MenuItem>
-                    <MenuItem value="marketing">Marketing</MenuItem>
-                    <MenuItem value="writing">Writing</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <Button variant="outlined" startIcon={<FilterList />} fullWidth>
-                  Filters
-                </Button>
-              </Grid>
-            </Grid>
-          </CardContent>
+        <Card style={{ marginBottom: 24, borderRadius: 12, border: '1px solid #EEEEEE' }}>
+          <Row gutter={[16, 16]} align="middle">
+            <Col span={24} md={{ span: 12 }}>
+              <Input
+                placeholder="Search jobs..."
+                prefix={<SearchOutlined />}
+                size="large"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ borderRadius: 8 }}
+              />
+            </Col>
+            <Col span={24} sm={{ span: 12 }} md={{ span: 6 }}>
+              <Select
+                placeholder="Category"
+                size="large"
+                value={category}
+                onChange={setCategory}
+                style={{ width: '100%', borderRadius: 8 }}
+              >
+                <Option value="all">All Categories</Option>
+                <Option value="development">Development</Option>
+                <Option value="design">Design</Option>
+                <Option value="security">Security</Option>
+                <Option value="marketing">Marketing</Option>
+                <Option value="writing">Writing</Option>
+              </Select>
+            </Col>
+            <Col span={24} sm={{ span: 12 }} md={{ span: 6 }}>
+              <Button
+                icon={<FilterOutlined />}
+                size="large"
+                block
+                style={{ borderRadius: 8 }}
+              >
+                Filters
+              </Button>
+            </Col>
+          </Row>
         </Card>
 
         {/* Job Listings */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {jobs.map((job) => (
-            <Card key={job.id} sx={{ '&:hover': { boxShadow: 4 }, transition: 'box-shadow 0.3s' }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography
-                      component={Link}
-                      href={`/jobs/${job.id}`}
-                      variant="h6"
-                      fontWeight="bold"
-                      color="primary"
-                      sx={{ textDecoration: 'none', mb: 1, display: 'block', '&:hover': { textDecoration: 'underline' } }}
+        <LazySection minHeight={300}>
+          <Space direction="vertical" size="large" style={{ width: '100%' }}>
+            {jobs.map((job) => (
+            <Card
+              key={job.id}
+              style={{
+                borderRadius: 12,
+                border: '1px solid #EEEEEE',
+                transition: 'all 0.2s ease',
+              }}
+              hoverable
+              bodyStyle={{ padding: 24 }}
+            >
+              <Row gutter={[24, 16]}>
+                <Col span={24} lg={{ span: 18 }}>
+                  <Link href={`/jobs/${job.id}`} style={{ textDecoration: 'none' }}>
+                    <Title
+                      level={4}
+                      style={{
+                        marginBottom: 12,
+                        fontWeight: 600,
+                        color: '#14A800',
+                        fontSize: '1.25rem',
+                      }}
                     >
                       {job.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      {job.description}
-                    </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                      {job.skills.map((skill) => (
-                        <Chip key={skill} label={skill} size="small" color="primary" variant="outlined" />
-                      ))}
-                    </Box>
-                  </Box>
-                  <Box sx={{ textAlign: 'right', ml: 2 }}>
-                    <Typography variant="h5" fontWeight="bold" color="success.main">
-                      ${job.budget.toLocaleString()}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {job.currency}
-                    </Typography>
-                  </Box>
-                </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pt: 2, borderTop: 1, borderColor: 'divider' }}>
-                  <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                    <Chip label={job.category} size="small" />
-                    <Typography variant="body2" color="text.secondary">
-                      {job.proposalCount} proposals
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {job.createdAt}
-                    </Typography>
-                  </Box>
-                  <Button component={Link} href={`/jobs/${job.id}`} variant="contained">
-                    View Details
-                  </Button>
-                </Box>
-              </CardContent>
+                    </Title>
+                  </Link>
+                  <Paragraph
+                    style={{
+                      color: '#6B6B6B',
+                      marginBottom: 16,
+                      lineHeight: 1.6,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {job.description}
+                  </Paragraph>
+                  <Space wrap style={{ marginBottom: 16 }}>
+                    {job.skills.map((skill) => (
+                      <Tag
+                        key={skill}
+                        style={{
+                          borderRadius: 6,
+                          padding: '4px 12px',
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                          border: '1px solid #E0E0E0',
+                          background: '#FAFAFA',
+                        }}
+                      >
+                        {skill}
+                      </Tag>
+                    ))}
+                  </Space>
+                </Col>
+                <Col span={24} lg={{ span: 6 }} style={{ textAlign: 'right' }}>
+                  <Title
+                    level={3}
+                    style={{
+                      marginBottom: 4,
+                      fontWeight: 700,
+                      color: '#14A800',
+                    }}
+                  >
+                    ${job.budget.toLocaleString()}
+                  </Title>
+                  <Text type="secondary" style={{ fontSize: '0.75rem' }}>
+                    {job.currency}
+                  </Text>
+                </Col>
+              </Row>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  paddingTop: 20,
+                  borderTop: '1px solid #EEEEEE',
+                  flexWrap: 'wrap',
+                  gap: 16,
+                }}
+              >
+                <Space wrap>
+                  <Tag style={{ borderRadius: 6, fontWeight: 500 }}>{job.category}</Tag>
+                  <Text type="secondary" style={{ fontSize: '0.875rem' }}>
+                    {job.proposalCount} proposals
+                  </Text>
+                  <Text type="secondary" style={{ fontSize: '0.875rem' }}>
+                    {job.createdAt}
+                  </Text>
+                </Space>
+                <Button
+                  type="primary"
+                  href={`/jobs/${job.id}`}
+                  style={{ borderRadius: 8, fontWeight: 600 }}
+                >
+                  View Details
+                </Button>
+              </div>
             </Card>
-          ))}
-        </Box>
+            ))}
+          </Space>
+        </LazySection>
 
         {/* Empty State */}
         {jobs.length === 0 && (
           <Card>
-            <CardContent sx={{ textAlign: 'center', py: 6 }}>
-              <Typography variant="h6" color="text.secondary">
-                No jobs found matching your criteria.
-              </Typography>
-            </CardContent>
+            <Empty
+              description={
+                <Text type="secondary">No jobs found matching your criteria.</Text>
+              }
+            />
           </Card>
         )}
-      </Container>
-    </Box>
+      </Content>
+    </Layout>
   );
 }

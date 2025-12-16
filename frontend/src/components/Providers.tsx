@@ -10,8 +10,8 @@ import { apolloClient } from '@/lib/apollo';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { mainnet, polygon, sepolia } from 'wagmi/chains';
 import { http } from 'wagmi';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
+import { ConfigProvider } from 'antd';
+import 'antd/dist/reset.css';
 
 const config = getDefaultConfig({
   appName: 'Decentralized Freelance Marketplace',
@@ -24,34 +24,71 @@ const config = getDefaultConfig({
   },
 });
 
-// Create MUI theme
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#0ea5e9',
-      light: '#38bdf8',
-      dark: '#0284c7',
-    },
-    secondary: {
-      main: '#a855f7',
-      light: '#c084fc',
-      dark: '#9333ea',
-    },
-  },
-  typography: {
-    fontFamily: ['Inter', 'system-ui', 'sans-serif'].join(','),
+// Modern, clean theme configuration
+const antdTheme = {
+  token: {
+    colorPrimary: '#14A800', // Upwork green
+    colorSuccess: '#52c41a',
+    colorWarning: '#faad14',
+    colorError: '#ff4d4f',
+    colorInfo: '#1F57C3',
+    borderRadius: 8,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    fontSize: 14,
+    lineHeight: 1.5715,
+    // Modern color palette
+    colorText: '#1a1a1a',
+    colorTextSecondary: '#6b7280',
+    colorBgContainer: '#ffffff',
+    colorBgLayout: '#fafafa',
+    colorBorder: '#e5e7eb',
+    colorBorderSecondary: '#f3f4f6',
+    // Better shadows
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1)',
+    boxShadowSecondary: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
   },
   components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-          borderRadius: 8,
-        },
-      },
+    Button: {
+      borderRadius: 8,
+      fontWeight: 600,
+      controlHeight: 40,
+      boxShadow: 'none',
+      primaryShadow: '0 2px 0 rgba(0, 0, 0, 0.02)',
+    },
+    Card: {
+      borderRadius: 12,
+      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1)',
+      paddingLG: 24,
+    },
+    Input: {
+      borderRadius: 8,
+      controlHeight: 40,
+      paddingInline: 12,
+      hoverBorderColor: '#14A800',
+      activeBorderColor: '#14A800',
+    },
+    Select: {
+      borderRadius: 8,
+      controlHeight: 40,
+    },
+    Layout: {
+      bodyBg: '#fafafa',
+      headerBg: '#ffffff',
+      headerHeight: 72,
+      headerPadding: '0 32px',
+    },
+    Menu: {
+      itemBorderRadius: 6,
+      itemHoverBg: '#f5f5f5',
+      itemSelectedBg: '#f0fdf4',
+      itemSelectedColor: '#14A800',
+      itemActiveBg: '#f0fdf4',
+    },
+    Avatar: {
+      borderRadius: 8,
     },
   },
-});
+};
 
 export function Providers({ children }: { children: React.ReactNode }) {
   // Create QueryClient inside component to avoid SSR issues
@@ -71,8 +108,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    <ConfigProvider theme={antdTheme}>
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
           <RainbowKitProvider>
@@ -84,7 +120,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           </RainbowKitProvider>
         </QueryClientProvider>
       </WagmiProvider>
-    </ThemeProvider>
+    </ConfigProvider>
   );
 }
 

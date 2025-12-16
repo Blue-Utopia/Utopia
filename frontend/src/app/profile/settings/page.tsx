@@ -33,6 +33,7 @@ import {
   Avatar,
 } from '@mui/material';
 import { Add, Delete, CheckCircle, Star } from '@mui/icons-material';
+import { LazySection } from '@/components/LazySection';
 
 const GET_USER_PROFILE = gql`
   query GetUserProfile {
@@ -181,7 +182,11 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`profile-tab-${index}`}
       {...other}
     >
-      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
+      {value === index && (
+        <LazySection minHeight={300}>
+          <Box sx={{ pt: 3 }}>{children}</Box>
+        </LazySection>
+      )}
     </div>
   );
 }
