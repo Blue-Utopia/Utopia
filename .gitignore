@@ -70,4 +70,4 @@ public/uploads/
 secrets.json
 
 #package
-package.lock.json
+package-lock.json
