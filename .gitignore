@@ -69,3 +69,5 @@ public/uploads/
 # Blockchain
 secrets.json
 
+#package
+package.lock.json
