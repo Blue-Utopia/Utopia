@@ -36,7 +36,7 @@ export function useAuth() {
       // Verify signature and get JWT
       const response = await authApi.verify(address, signature, nonce);
 
-      // Update context
+      // Update context (which uses TanStack Query internally)
       setAuthenticated(response.token, response.user);
 
       toast.success('Successfully authenticated!');
@@ -83,4 +83,3 @@ export function useAuth() {
     logout,
   };
 }
-
