@@ -6,7 +6,7 @@ export const typeDefs = gql`
 
   type User {
     id: ID!
-    walletAddress: String!
+    walletAddress: String
     username: String
     email: String
     phoneNumber: String
@@ -338,6 +338,8 @@ export const typeDefs = gql`
     
     # Profile management
     updateProfile(input: UpdateProfileInput!): User!
+    changePassword(currentPassword: String!, newPassword: String!): Boolean!
+    changeUsername(newUsername: String!): User!
     addSkill(input: AddSkillInput!): UserSkill!
     removeSkill(skillId: ID!): Boolean!
     addPortfolio(input: CreatePortfolioInput!): Portfolio!

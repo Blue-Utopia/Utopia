@@ -2,7 +2,24 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { FaSearch, FaFilter } from 'react-icons/fa';
+import {
+  Container,
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  Chip,
+  InputAdornment,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Paper,
+  Grid,
+} from '@mui/material';
+import { Search, FilterList } from '@mui/icons-material';
 
 export default function JobsPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,102 +63,127 @@ export default function JobsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">Find Work</h1>
-          <p className="text-gray-600">
+    <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50', py: 4 }}>
+      <Container maxWidth="lg">
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h3" component="h1" fontWeight="bold" gutterBottom>
+            Find Work
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
             Browse available jobs and submit proposals to get hired.
-          </p>
-        </div>
+          </Typography>
+        </Box>
 
         {/* Search and Filter */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
+        <Card sx={{ mb: 3 }}>
+          <CardContent>
+            <Grid container spacing={2} alignItems="center">
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  fullWidth
                   placeholder="Search jobs..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="input pl-10"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Search />
+                      </InputAdornment>
+                    ),
+                  }}
                 />
-              </div>
-            </div>
-            <div className="w-full md:w-64">
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="input"
-              >
-                <option value="all">All Categories</option>
-                <option value="development">Development</option>
-                <option value="design">Design</option>
-                <option value="security">Security</option>
-                <option value="marketing">Marketing</option>
-                <option value="writing">Writing</option>
-              </select>
-            </div>
-            <button className="btn btn-outline flex items-center gap-2">
-              <FaFilter /> Filters
-            </button>
-          </div>
-        </div>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <FormControl fullWidth>
+                  <InputLabel>Category</InputLabel>
+                  <Select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    label="Category"
+                  >
+                    <MenuItem value="all">All Categories</MenuItem>
+                    <MenuItem value="development">Development</MenuItem>
+                    <MenuItem value="design">Design</MenuItem>
+                    <MenuItem value="security">Security</MenuItem>
+                    <MenuItem value="marketing">Marketing</MenuItem>
+                    <MenuItem value="writing">Writing</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Button variant="outlined" startIcon={<FilterList />} fullWidth>
+                  Filters
+                </Button>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
 
         {/* Job Listings */}
-        <div className="space-y-4">
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {jobs.map((job) => (
-            <div key={job.id} className="card hover:shadow-lg transition-shadow">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex-1">
-                  <Link href={`/jobs/${job.id}`}>
-                    <h2 className="text-xl font-bold text-primary-600 hover:text-primary-700 mb-2">
+            <Card key={job.id} sx={{ '&:hover': { boxShadow: 4 }, transition: 'box-shadow 0.3s' }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography
+                      component={Link}
+                      href={`/jobs/${job.id}`}
+                      variant="h6"
+                      fontWeight="bold"
+                      color="primary"
+                      sx={{ textDecoration: 'none', mb: 1, display: 'block', '&:hover': { textDecoration: 'underline' } }}
+                    >
                       {job.title}
-                    </h2>
-                  </Link>
-                  <p className="text-gray-600 mb-3">{job.description}</p>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {job.skills.map((skill) => (
-                      <span
-                        key={skill}
-                        className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm"
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div className="text-right ml-4">
-                  <div className="text-2xl font-bold text-green-600">
-                    ${job.budget.toLocaleString()}
-                  </div>
-                  <div className="text-sm text-gray-500">{job.currency}</div>
-                </div>
-              </div>
-              <div className="flex justify-between items-center text-sm text-gray-500 pt-3 border-t">
-                <div className="flex gap-4">
-                  <span className="bg-gray-100 px-3 py-1 rounded">{job.category}</span>
-                  <span>{job.proposalCount} proposals</span>
-                  <span>{job.createdAt}</span>
-                </div>
-                <Link href={`/jobs/${job.id}`} className="btn btn-primary">
-                  View Details
-                </Link>
-              </div>
-            </div>
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      {job.description}
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                      {job.skills.map((skill) => (
+                        <Chip key={skill} label={skill} size="small" color="primary" variant="outlined" />
+                      ))}
+                    </Box>
+                  </Box>
+                  <Box sx={{ textAlign: 'right', ml: 2 }}>
+                    <Typography variant="h5" fontWeight="bold" color="success.main">
+                      ${job.budget.toLocaleString()}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {job.currency}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pt: 2, borderTop: 1, borderColor: 'divider' }}>
+                  <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                    <Chip label={job.category} size="small" />
+                    <Typography variant="body2" color="text.secondary">
+                      {job.proposalCount} proposals
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {job.createdAt}
+                    </Typography>
+                  </Box>
+                  <Button component={Link} href={`/jobs/${job.id}`} variant="contained">
+                    View Details
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
           ))}
-        </div>
+        </Box>
 
         {/* Empty State */}
         {jobs.length === 0 && (
-          <div className="card text-center py-12">
-            <p className="text-gray-500 text-lg">No jobs found matching your criteria.</p>
-          </div>
+          <Card>
+            <CardContent sx={{ textAlign: 'center', py: 6 }}>
+              <Typography variant="h6" color="text.secondary">
+                No jobs found matching your criteria.
+              </Typography>
+            </CardContent>
+          </Card>
         )}
-      </div>
-    </div>
+      </Container>
+    </Box>
   );
 }
-

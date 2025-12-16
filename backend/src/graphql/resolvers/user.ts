@@ -217,10 +217,87 @@ export const userResolvers = {
         throw new Error('Not authenticated');
       }
 
+      // Check if username is being updated and if it's already taken
+      if (input.username) {
+        const existingUser = await context.prisma.user.findUnique({
+          where: { username: input.username },
+        });
+        
+        if (existingUser && existingUser.id !== context.user.id) {
+          throw new Error('Username already taken');
+        }
+      }
+
       return await context.prisma.user.update({
         where: { id: context.user.id },
         data: {
           ...input,
+          updatedAt: new Date(),
+        },
+      });
+    },
+
+    changePassword: async (
+      _: any,
+      { currentPassword, newPassword }: any,
+      context: Context
+    ) => {
+      if (!context.user) {
+        throw new Error('Not authenticated');
+      }
+
+      // Get user with password
+      const user = await context.prisma.user.findUnique({
+        where: { id: context.user.id },
+      });
+
+      if (!user || !user.password) {
+        throw new Error('Password not set for this account');
+      }
+
+      // Verify current password
+      const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+      if (!isValidPassword) {
+        throw new Error('Current password is incorrect');
+      }
+
+      // Validate new password
+      if (newPassword.length < 8) {
+        throw new Error('New password must be at least 8 characters long');
+      }
+
+      // Hash and update password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      await context.prisma.user.update({
+        where: { id: context.user.id },
+        data: { password: hashedPassword },
+      });
+
+      return true;
+    },
+
+    changeUsername: async (
+      _: any,
+      { newUsername }: any,
+      context: Context
+    ) => {
+      if (!context.user) {
+        throw new Error('Not authenticated');
+      }
+
+      // Check if username is already taken
+      const existingUser = await context.prisma.user.findUnique({
+        where: { username: newUsername },
+      });
+
+      if (existingUser) {
+        throw new Error('Username already taken');
+      }
+
+      return await context.prisma.user.update({
+        where: { id: context.user.id },
+        data: {
+          username: newUsername,
           updatedAt: new Date(),
         },
       });

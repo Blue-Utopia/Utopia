@@ -10,6 +10,8 @@ import { apolloClient } from '@/lib/apollo';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { mainnet, polygon, sepolia } from 'wagmi/chains';
 import { http } from 'wagmi';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 
 const config = getDefaultConfig({
   appName: 'Decentralized Freelance Marketplace',
@@ -19,6 +21,35 @@ const config = getDefaultConfig({
     [mainnet.id]: http(),
     [polygon.id]: http(),
     [sepolia.id]: http(),
+  },
+});
+
+// Create MUI theme
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#0ea5e9',
+      light: '#38bdf8',
+      dark: '#0284c7',
+    },
+    secondary: {
+      main: '#a855f7',
+      light: '#c084fc',
+      dark: '#9333ea',
+    },
+  },
+  typography: {
+    fontFamily: ['Inter', 'system-ui', 'sans-serif'].join(','),
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          borderRadius: 8,
+        },
+      },
+    },
   },
 });
 
@@ -40,17 +71,20 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider>
-          <ApolloProvider client={apolloClient}>
-            <AuthProvider>
-              {children}
-            </AuthProvider>
-          </ApolloProvider>
-        </RainbowKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitProvider>
+            <ApolloProvider client={apolloClient}>
+              <AuthProvider>
+                {children}
+              </AuthProvider>
+            </ApolloProvider>
+          </RainbowKitProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </ThemeProvider>
   );
 }
 
