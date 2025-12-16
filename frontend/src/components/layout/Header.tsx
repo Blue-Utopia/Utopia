@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAccount } from 'wagmi';
@@ -13,9 +13,24 @@ import {
   Badge, 
   IconButton,
   Skeleton,
-  Container
+  Container,
+  Avatar,
+  Menu,
+  MenuItem,
+  Divider,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
-import { Notifications, Mail } from '@mui/icons-material';
+import { 
+  Notifications, 
+  Mail, 
+  Settings, 
+  Help, 
+  Language, 
+  Logout,
+  Person,
+  Verified,
+} from '@mui/icons-material';
 import { useAuth } from '@/hooks/useAuth';
 
 export function Header() {
@@ -23,10 +38,39 @@ export function Header() {
   const { isAuthenticated, user, logout, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const menuOpen = Boolean(anchorEl);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleAvatarClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    handleMenuClose();
+    logout();
+    router.push('/');
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const getUserDisplayName = () => {
+    return user?.displayName || user?.username || user?.email?.split('@')[0] || 'User';
+  };
 
   return (
     <AppBar position="sticky" sx={{ bgcolor: 'white', color: 'text.primary', boxShadow: 2 }}>
@@ -92,43 +136,179 @@ export function Header() {
             {!mounted || authLoading ? (
               <>
                 <Skeleton variant="rectangular" width={64} height={32} sx={{ borderRadius: 1 }} />
-                <Skeleton variant="rectangular" width={80} height={32} sx={{ borderRadius: 1 }} />
+                <Skeleton variant="circular" width={40} height={40} />
               </>
             ) : isAuthenticated ? (
               <>
-                {user && (
-                  <Typography
-                    component={Link}
-                    href="/profile/settings"
+                <IconButton
+                  onClick={handleAvatarClick}
+                  sx={{ p: 0 }}
+                  aria-label="account menu"
+                  aria-controls={menuOpen ? 'account-menu' : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={menuOpen ? 'true' : undefined}
+                >
+                  <Avatar
+                    src={user?.avatar || undefined}
+                    alt={getUserDisplayName()}
                     sx={{
-                      display: { xs: 'none', sm: 'block' },
-                      fontSize: '0.875rem',
-                      color: 'text.secondary',
-                      textDecoration: 'none',
-                      '&:hover': { color: 'primary.main' },
+                      width: 40,
+                      height: 40,
+                      bgcolor: 'primary.main',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        boxShadow: 2,
+                      },
                     }}
                   >
-                    {user.displayName || user.username || user.email}
-                  </Typography>
-                )}
-                <Button
-                  component={Link}
-                  href="/profile/settings"
-                  color="inherit"
-                  sx={{ fontSize: '0.875rem' }}
-                >
-                  Profile
-                </Button>
-                <Button
-                  onClick={() => {
-                    logout();
-                    router.push('/');
+                    {!user?.avatar && getUserDisplayName().charAt(0).toUpperCase()}
+                  </Avatar>
+                </IconButton>
+                <Menu
+                  anchorEl={anchorEl}
+                  id="account-menu"
+                  open={menuOpen}
+                  onClose={handleMenuClose}
+                  onClick={handleMenuClose}
+                  PaperProps={{
+                    elevation: 3,
+                    sx: {
+                      overflow: 'visible',
+                      filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                      mt: 1.5,
+                      minWidth: 280,
+                      '& .MuiAvatar-root': {
+                        width: 56,
+                        height: 56,
+                        ml: -0.5,
+                        mr: 1,
+                      },
+                      '&:before': {
+                        content: '""',
+                        display: 'block',
+                        position: 'absolute',
+                        top: 0,
+                        right: 14,
+                        width: 10,
+                        height: 10,
+                        bgcolor: 'background.paper',
+                        transform: 'translateY(-50%) rotate(45deg)',
+                        zIndex: 0,
+                      },
+                    },
                   }}
-                  color="inherit"
-                  sx={{ fontSize: '0.875rem' }}
+                  transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                  anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                 >
-                  Logout
-                </Button>
+                  {/* User Info Section */}
+                  <Box sx={{ px: 2, py: 1.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+                      <Avatar
+                        src={user?.avatar || undefined}
+                        alt={getUserDisplayName()}
+                        sx={{
+                          width: 56,
+                          height: 56,
+                          bgcolor: 'primary.main',
+                        }}
+                      >
+                        {!user?.avatar && getUserDisplayName().charAt(0).toUpperCase()}
+                      </Avatar>
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography variant="subtitle1" fontWeight="bold" noWrap>
+                          {getUserDisplayName()}
+                        </Typography>
+                        {user?.role && (
+                          <Typography variant="body2" color="text.secondary" noWrap>
+                            {user.role === 'CLIENT' ? 'Client' : user.role === 'DEVELOPER' ? 'Developer' : 'Freelancer'}
+                          </Typography>
+                        )}
+                      </Box>
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 1, mt: 1.5 }}>
+                      <Button
+                        component={Link}
+                        href="/profile/settings"
+                        variant="outlined"
+                        size="small"
+                        fullWidth
+                        sx={{ fontSize: '0.75rem' }}
+                      >
+                        View profile
+                      </Button>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        fullWidth
+                        sx={{ fontSize: '0.75rem' }}
+                        startIcon={<Verified sx={{ fontSize: 16 }} />}
+                      >
+                        Verify
+                      </Button>
+                    </Box>
+                  </Box>
+                  <Divider />
+                  
+                  {/* Account Section */}
+                  <Box sx={{ px: 1, py: 0.5 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ px: 2, py: 0.5, display: 'block' }}>
+                      Account
+                    </Typography>
+                    <MenuItem component={Link} href="/premium">
+                      <ListItemIcon>
+                        <Box sx={{ width: 20, height: 20, bgcolor: 'warning.main', borderRadius: 0.5 }} />
+                      </ListItemIcon>
+                      <ListItemText primary="Try Premium for free" />
+                    </MenuItem>
+                    <MenuItem component={Link} href="/profile/settings">
+                      <ListItemIcon>
+                        <Settings fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText primary="Settings & Privacy" />
+                    </MenuItem>
+                    <MenuItem component={Link} href="/help">
+                      <ListItemIcon>
+                        <Help fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText primary="Help" />
+                    </MenuItem>
+                    <MenuItem>
+                      <ListItemIcon>
+                        <Language fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText primary="Language" />
+                    </MenuItem>
+                  </Box>
+                  <Divider />
+                  
+                  {/* Manage Section */}
+                  <Box sx={{ px: 1, py: 0.5 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ px: 2, py: 0.5, display: 'block' }}>
+                      Manage
+                    </Typography>
+                    <MenuItem component={Link} href="/my-jobs">
+                      <ListItemIcon>
+                        <Person fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText primary="Posts & Activity" />
+                    </MenuItem>
+                    <MenuItem component={Link} href="/post-job">
+                      <ListItemIcon>
+                        <Person fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText primary="Job Posting Account" />
+                    </MenuItem>
+                  </Box>
+                  <Divider />
+                  
+                  {/* Sign Out */}
+                  <MenuItem onClick={handleLogout}>
+                    <ListItemIcon>
+                      <Logout fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText primary="Sign Out" />
+                  </MenuItem>
+                </Menu>
               </>
             ) : (
               <>

@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount, useDisconnect } from 'wagmi';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation } from '@apollo/client';
 import { gql } from '@apollo/client';
+import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import {
   Container,
@@ -29,6 +30,7 @@ import {
   FormControl,
   InputLabel,
   Grid,
+  Avatar,
 } from '@mui/material';
 import { Add, Delete, CheckCircle, Star } from '@mui/icons-material';
 
@@ -186,7 +188,7 @@ function TabPanel(props: TabPanelProps) {
 
 export default function ProfileSettingsPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading, authenticate } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, authenticate, refreshUser } = useAuth();
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const [activeTab, setActiveTab] = useState(0);
@@ -285,7 +287,7 @@ export default function ProfileSettingsPage() {
               />
             </TabPanel>
             <TabPanel value={activeTab} index={1}>
-              <ProfileInfoTab user={user} updateProfile={updateProfile} refetch={refetch} />
+              <ProfileInfoTab user={user} updateProfile={updateProfile} refetch={refetch} refreshUser={refreshUser} />
             </TabPanel>
             <TabPanel value={activeTab} index={2}>
               <SkillsTab
@@ -482,8 +484,120 @@ function AccountSettingsTab({ user, changePassword, changeUsername, refetch }: a
   );
 }
 
+// Helper function to compress and resize image
+const compressImage = (file: File, maxWidth: number = 800, maxHeight: number = 800, quality: number = 0.8): Promise<File> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        // Calculate new dimensions
+        if (width > height) {
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = (width * maxHeight) / height;
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'));
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error('Failed to compress image'));
+              return;
+            }
+            const compressedFile = new File([blob], file.name, {
+              type: file.type,
+              lastModified: Date.now(),
+            });
+            resolve(compressedFile);
+          },
+          file.type,
+          quality
+        );
+      };
+      img.onerror = reject;
+    };
+    reader.onerror = reject;
+  });
+};
+
+// Helper function to create circular crop
+const createCircularCrop = (file: File): Promise<File> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const size = Math.min(img.width, img.height);
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'));
+          return;
+        }
+
+        // Create circular clipping path
+        ctx.beginPath();
+        ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+        ctx.clip();
+
+        // Draw image centered
+        const offsetX = (img.width - size) / 2;
+        const offsetY = (img.height - size) / 2;
+        ctx.drawImage(img, -offsetX, -offsetY, img.width, img.height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error('Failed to create circular crop'));
+              return;
+            }
+            const croppedFile = new File([blob], file.name, {
+              type: file.type,
+              lastModified: Date.now(),
+            });
+            resolve(croppedFile);
+          },
+          file.type,
+          0.9
+        );
+      };
+      img.onerror = reject;
+    };
+    reader.onerror = reject;
+  });
+};
+
 // Profile Info Tab Component
-function ProfileInfoTab({ user, updateProfile, refetch }: any) {
+function ProfileInfoTab({ user, updateProfile, refetch, refreshUser }: any) {
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     displayName: user.displayName || '',
     bio: user.bio || '',
@@ -492,6 +606,184 @@ function ProfileInfoTab({ user, updateProfile, refetch }: any) {
     avatar: user.avatar || '',
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(user.avatar || null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
+  useEffect(() => {
+    setFormData({
+      displayName: user.displayName || '',
+      bio: user.bio || '',
+      location: user.location || '',
+      timezone: user.timezone || '',
+      avatar: user.avatar || '',
+    });
+    setAvatarPreview(user.avatar || null);
+  }, [user]);
+
+  const processAndUploadImage = async (file: File) => {
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file (JPG, PNG, or GIF)');
+      return;
+    }
+
+    // Validate file size (max 10MB before compression)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Image size must be less than 10MB');
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadProgress(10);
+
+    try {
+      // Compress and resize image
+      setUploadProgress(30);
+      const compressedFile = await compressImage(file, 800, 800, 0.85);
+      
+      // Create circular crop
+      setUploadProgress(60);
+      const croppedFile = await createCircularCrop(compressedFile);
+
+      setUploadProgress(80);
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', croppedFile);
+
+      const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+
+      // Use the avatar-specific endpoint that auto-updates the profile
+      const response = await fetch(`${API_URL}/api/upload/avatar`, {
+        method: 'POST',
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: uploadFormData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Upload failed');
+      }
+
+      setUploadProgress(95);
+      const result = await response.json();
+      console.log('Upload result:', result);
+      
+      // Use fullUrl if available, otherwise construct it using API_URL
+      // Prefer the fullUrl from server, but fallback to constructing from API_URL
+      let avatarUrl = result.file.fullUrl || `${API_URL}${result.file.url}`;
+      
+      // Ensure URL is absolute (starts with http:// or https://)
+      if (avatarUrl.startsWith('//')) {
+        avatarUrl = `${window.location.protocol}${avatarUrl}`;
+      } else if (avatarUrl.startsWith('/')) {
+        // Relative URL - prepend API_URL
+        avatarUrl = `${API_URL}${avatarUrl}`;
+      }
+      
+      console.log('Avatar upload response:', result);
+      console.log('Constructed avatar URL:', avatarUrl);
+      console.log('API_URL:', API_URL);
+      
+      // Test image accessibility asynchronously (don't block or show errors)
+      setTimeout(() => {
+        const imgTest = new Image();
+        imgTest.onload = () => {
+          console.log('✅ Avatar image is accessible:', avatarUrl);
+        };
+        imgTest.onerror = () => {
+          console.warn('⚠️ Avatar image may not be accessible:', avatarUrl);
+          console.warn('Check: CORS settings, URL correctness, or server static file serving');
+          // Don't show error toast - upload was successful, just log warning
+        };
+        imgTest.src = avatarUrl;
+      }, 100);
+      
+      setFormData((prev) => ({ ...prev, avatar: avatarUrl }));
+      setAvatarPreview(avatarUrl);
+      setUploadProgress(100);
+      
+      // Immediately update the auth context cache with new avatar
+      // This ensures the header updates instantly without waiting for refetch
+      const currentAuthData = queryClient.getQueryData(['auth']);
+      if (currentAuthData && typeof currentAuthData === 'object' && 'user' in currentAuthData) {
+        queryClient.setQueryData(['auth'], {
+          ...currentAuthData,
+          user: {
+            ...(currentAuthData as any).user,
+            avatar: avatarUrl,
+          },
+        });
+        console.log('✅ Auth cache updated immediately with new avatar:', avatarUrl);
+      } else {
+        console.warn('⚠️ Could not update auth cache - currentAuthData:', currentAuthData);
+      }
+      
+      // Wait a moment for database to be updated
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Refetch both the profile query and auth context to get fresh data
+      try {
+        console.log('Refreshing user data after avatar upload...');
+        await Promise.all([
+          refetch(), // Refetch profile settings query
+          refreshUser(), // Refresh auth context (updates header avatar)
+        ]);
+        
+        console.log('User data refetched successfully');
+      } catch (refetchError) {
+        console.error('Refetch error:', refetchError);
+        // Still try to refresh manually
+        try {
+          await refreshUser();
+        } catch (e) {
+          console.error('Manual refresh also failed:', e);
+        }
+      }
+      
+      toast.success('Avatar uploaded and updated successfully!');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to upload avatar');
+      setUploadProgress(0);
+    } finally {
+      setIsUploading(false);
+      setTimeout(() => setUploadProgress(0), 1000);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    await processAndUploadImage(file);
+  };
+
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      await processAndUploadImage(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -501,7 +793,11 @@ function ProfileInfoTab({ user, updateProfile, refetch }: any) {
         variables: { input: formData },
       });
       toast.success('Profile updated successfully!');
-      await refetch();
+      // Refetch both queries to update all UI
+      await Promise.all([
+        refetch(),
+        refreshUser(),
+      ]);
     } catch (error: any) {
       toast.error(error.message || 'Failed to update profile');
     } finally {
@@ -515,6 +811,192 @@ function ProfileInfoTab({ user, updateProfile, refetch }: any) {
         Profile Information
       </Typography>
       <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 3, maxWidth: 700 }}>
+        {/* Avatar Upload Section */}
+        <Box>
+          <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 2 }}>
+            Profile Picture
+          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 4, alignItems: { xs: 'center', sm: 'flex-start' } }}>
+            {/* Avatar Preview */}
+            <Box sx={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ position: 'relative' }}>
+                <Avatar
+                  src={avatarPreview || undefined}
+                  alt={formData.displayName || 'Avatar'}
+                  sx={{
+                    width: 160,
+                    height: 160,
+                    bgcolor: 'primary.main',
+                    fontSize: '4rem',
+                    border: '4px solid',
+                    borderColor: 'divider',
+                    boxShadow: 3,
+                  }}
+                >
+                  {!avatarPreview && (formData.displayName || 'U').charAt(0).toUpperCase()}
+                </Avatar>
+                {isUploading && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: 'rgba(0, 0, 0, 0.5)',
+                      borderRadius: '50%',
+                    }}
+                  >
+                    <CircularProgress size={40} sx={{ color: 'white' }} />
+                  </Box>
+                )}
+              </Box>
+              {uploadProgress > 0 && uploadProgress < 100 && (
+                <Box sx={{ width: 160 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      Uploading...
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {uploadProgress}%
+                    </Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: 4,
+                      bgcolor: 'grey.200',
+                      borderRadius: 2,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: `${uploadProgress}%`,
+                        height: '100%',
+                        bgcolor: 'primary.main',
+                        transition: 'width 0.3s ease',
+                      }}
+                    />
+                  </Box>
+                </Box>
+              )}
+            </Box>
+
+            {/* Upload Controls */}
+            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <input
+                ref={fileInputRef}
+                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                style={{ display: 'none' }}
+                id="avatar-upload"
+                type="file"
+                onChange={handleAvatarUpload}
+                disabled={isUploading}
+              />
+              
+              {/* Drag and Drop Zone */}
+              <Box
+                ref={dropZoneRef}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                sx={{
+                  border: '2px dashed',
+                  borderColor: isDragging ? 'primary.main' : 'divider',
+                  borderRadius: 2,
+                  p: 3,
+                  textAlign: 'center',
+                  bgcolor: isDragging ? 'action.hover' : 'transparent',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    borderColor: 'primary.main',
+                    bgcolor: 'action.hover',
+                  },
+                }}
+                onClick={() => !isUploading && fileInputRef.current?.click()}
+              >
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                  <Add sx={{ fontSize: 48, color: 'text.secondary' }} />
+                  <Typography variant="body1" fontWeight="medium">
+                    {isDragging ? 'Drop image here' : 'Click to upload or drag and drop'}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    JPG, PNG, GIF or WEBP (Max 10MB)
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Image will be automatically cropped to a circle and optimized
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Action Buttons */}
+              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                <Button
+                  variant="outlined"
+                  component="label"
+                  htmlFor="avatar-upload"
+                  disabled={isUploading}
+                  startIcon={<Add />}
+                  sx={{ flex: { xs: 1, sm: 'none' } }}
+                >
+                  {isUploading ? 'Uploading...' : 'Choose File'}
+                </Button>
+                {avatarPreview && (
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={() => {
+                      setFormData((prev) => ({ ...prev, avatar: '' }));
+                      setAvatarPreview(null);
+                      if (fileInputRef.current) {
+                        fileInputRef.current.value = '';
+                      }
+                    }}
+                    disabled={isUploading}
+                    sx={{ flex: { xs: 1, sm: 'none' } }}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </Box>
+
+              {/* Size Previews */}
+              {avatarPreview && (
+                <Box>
+                  <Typography variant="caption" color="text.secondary" gutterBottom sx={{ display: 'block', mb: 1 }}>
+                    Preview sizes:
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+                      <Avatar src={avatarPreview} sx={{ width: 40, height: 40 }} />
+                      <Typography variant="caption" color="text.secondary">
+                        Small
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+                      <Avatar src={avatarPreview} sx={{ width: 64, height: 64 }} />
+                      <Typography variant="caption" color="text.secondary">
+                        Medium
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+                      <Avatar src={avatarPreview} sx={{ width: 120, height: 120 }} />
+                      <Typography variant="caption" color="text.secondary">
+                        Large
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          </Box>
+        </Box>
+
         <TextField
           label="Display Name"
           value={formData.displayName}
@@ -545,12 +1027,17 @@ function ProfileInfoTab({ user, updateProfile, refetch }: any) {
           placeholder="e.g., UTC-5, EST"
         />
         <TextField
-          label="Avatar URL"
+          label="Avatar URL (optional)"
           type="url"
           value={formData.avatar}
-          onChange={(e) => setFormData({ ...formData, avatar: e.target.value })}
+          onChange={(e) => {
+            setFormData({ ...formData, avatar: e.target.value });
+            setAvatarPreview(e.target.value || null);
+          }}
           fullWidth
           placeholder="https://example.com/avatar.jpg"
+          helperText="Or paste an image URL directly (will override uploaded image)"
+          sx={{ mt: 2 }}
         />
         <Button type="submit" variant="contained" disabled={isSaving} sx={{ alignSelf: 'flex-start' }}>
           {isSaving ? 'Saving...' : 'Save Changes'}
