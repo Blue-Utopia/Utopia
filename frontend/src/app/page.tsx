@@ -1,205 +1,273 @@
 'use client';
 
 import Link from 'next/link';
-import { FaRocket, FaShieldAlt, FaCoins, FaBolt } from 'react-icons/fa';
+import {
+  Box,
+  Container,
+  Typography,
+  Button,
+  Card,
+  CardContent,
+  Avatar,
+  Paper,
+  Grid,
+} from '@mui/material';
+import {
+  Security,
+  AccountBalanceWallet,
+  RocketLaunch,
+  Bolt,
+} from '@mui/icons-material';
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen">
+    <Box sx={{ minHeight: '100vh' }}>
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-primary-600 to-secondary-600 text-white py-20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
+      <Box
+        sx={{
+          background: 'linear-gradient(135deg, #0ea5e9 0%, #a855f7 100%)',
+          color: 'white',
+          py: 10,
+        }}
+      >
+        <Container maxWidth="lg">
+          <Box sx={{ maxWidth: 800, mx: 'auto', textAlign: 'center' }}>
+            <Typography variant="h2" component="h1" fontWeight="bold" gutterBottom sx={{ fontSize: { xs: '2.5rem', md: '3.75rem' } }}>
               Decentralized Freelance Marketplace
-            </h1>
-            <p className="text-xl md:text-2xl mb-8 text-gray-100">
+            </Typography>
+            <Typography variant="h5" sx={{ mb: 4, color: 'rgba(255, 255, 255, 0.9)' }}>
               Work freely. Get paid instantly. No middlemen. Pure crypto.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, justifyContent: 'center' }}>
+              <Button
+                component={Link}
                 href="/jobs"
-                className="btn btn-primary bg-white text-primary-600 hover:bg-gray-100 px-8 py-3 text-lg"
+                variant="contained"
+                size="large"
+                sx={{
+                  bgcolor: 'white',
+                  color: 'primary.main',
+                  px: 4,
+                  py: 1.5,
+                  fontSize: '1.125rem',
+                  '&:hover': { bgcolor: 'grey.100' },
+                }}
               >
                 Find Work
-              </Link>
-              <Link
+              </Button>
+              <Button
+                component={Link}
                 href="/post-job"
-                className="btn btn-outline border-white text-white hover:bg-white hover:text-primary-600 px-8 py-3 text-lg"
+                variant="outlined"
+                size="large"
+                sx={{
+                  borderColor: 'white',
+                  color: 'white',
+                  px: 4,
+                  py: 1.5,
+                  fontSize: '1.125rem',
+                  '&:hover': {
+                    borderColor: 'white',
+                    bgcolor: 'white',
+                    color: 'primary.main',
+                  },
+                }}
               >
                 Hire Talent
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+              </Button>
+            </Box>
+          </Box>
+        </Container>
+      </Box>
 
       {/* Features Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-12">Why Choose Us?</h2>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="card text-center">
-              <div className="flex justify-center mb-4">
-                <div className="bg-primary-100 p-4 rounded-full">
-                  <FaShieldAlt className="text-4xl text-primary-600" />
-                </div>
-              </div>
-              <h3 className="text-xl font-bold mb-2">Trustless Escrow</h3>
-              <p className="text-gray-600">
-                Smart contract escrow ensures secure payments. No disputes, no delays.
-              </p>
-            </div>
+      <Box sx={{ py: 10, bgcolor: 'grey.50' }}>
+        <Container maxWidth="lg">
+          <Typography variant="h3" component="h2" fontWeight="bold" textAlign="center" gutterBottom sx={{ mb: 6 }}>
+            Why Choose Us?
+          </Typography>
 
-            <div className="card text-center">
-              <div className="flex justify-center mb-4">
-                <div className="bg-secondary-100 p-4 rounded-full">
-                  <FaCoins className="text-4xl text-secondary-600" />
-                </div>
-              </div>
-              <h3 className="text-xl font-bold mb-2">Crypto Payments</h3>
-              <p className="text-gray-600">
-                Get paid in USDC, USDT, or ETH. Instant withdrawals, global reach.
-              </p>
-            </div>
+          <Grid container spacing={4}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Card sx={{ textAlign: 'center', height: '100%' }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                    <Avatar sx={{ bgcolor: 'primary.100', width: 64, height: 64 }}>
+                      <Security sx={{ fontSize: 32, color: 'primary.main' }} />
+                    </Avatar>
+                  </Box>
+                  <Typography variant="h6" fontWeight="bold" gutterBottom>
+                    Trustless Escrow
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Smart contract escrow ensures secure payments. No disputes, no delays.
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
 
-            <div className="card text-center">
-              <div className="flex justify-center mb-4">
-                <div className="bg-green-100 p-4 rounded-full">
-                  <FaRocket className="text-4xl text-green-600" />
-                </div>
-              </div>
-              <h3 className="text-xl font-bold mb-2">No KYC Required</h3>
-              <p className="text-gray-600">
-                Start working immediately. Skills matter, not documents.
-              </p>
-            </div>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Card sx={{ textAlign: 'center', height: '100%' }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                    <Avatar sx={{ bgcolor: 'secondary.100', width: 64, height: 64 }}>
+                      <AccountBalanceWallet sx={{ fontSize: 32, color: 'secondary.main' }} />
+                    </Avatar>
+                  </Box>
+                  <Typography variant="h6" fontWeight="bold" gutterBottom>
+                    Crypto Payments
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Get paid in USDC, USDT, or ETH. Instant withdrawals, global reach.
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
 
-            <div className="card text-center">
-              <div className="flex justify-center mb-4">
-                <div className="bg-yellow-100 p-4 rounded-full">
-                  <FaBolt className="text-4xl text-yellow-600" />
-                </div>
-              </div>
-              <h3 className="text-xl font-bold mb-2">On-Chain Reputation</h3>
-              <p className="text-gray-600">
-                Build immutable reputation. Your work history follows you forever.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Card sx={{ textAlign: 'center', height: '100%' }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                    <Avatar sx={{ bgcolor: 'success.light', width: 64, height: 64 }}>
+                      <RocketLaunch sx={{ fontSize: 32, color: 'success.main' }} />
+                    </Avatar>
+                  </Box>
+                  <Typography variant="h6" fontWeight="bold" gutterBottom>
+                    No KYC Required
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Start working immediately. Skills matter, not documents.
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Card sx={{ textAlign: 'center', height: '100%' }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                    <Avatar sx={{ bgcolor: 'warning.light', width: 64, height: 64 }}>
+                      <Bolt sx={{ fontSize: 32, color: 'warning.main' }} />
+                    </Avatar>
+                  </Box>
+                  <Typography variant="h6" fontWeight="bold" gutterBottom>
+                    On-Chain Reputation
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Build immutable reputation. Your work history follows you forever.
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
 
       {/* How It Works */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-12">How It Works</h2>
-          
-          <div className="max-w-4xl mx-auto">
+      <Box sx={{ py: 10 }}>
+        <Container maxWidth="lg">
+          <Typography variant="h3" component="h2" fontWeight="bold" textAlign="center" gutterBottom sx={{ mb: 6 }}>
+            How It Works
+          </Typography>
+
+          <Box sx={{ maxWidth: 800, mx: 'auto' }}>
             {/* For Developers */}
-            <div className="mb-12">
-              <h3 className="text-2xl font-bold mb-6 text-primary-600">For Developers</h3>
-              <div className="space-y-4">
-                <div className="flex gap-4">
-                  <div className="bg-primary-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">
-                    1
-                  </div>
-                  <div>
-                    <h4 className="font-bold mb-1">Connect Your Wallet</h4>
-                    <p className="text-gray-600">No email, no password. Just your Web3 wallet.</p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="bg-primary-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">
-                    2
-                  </div>
-                  <div>
-                    <h4 className="font-bold mb-1">Build Your Profile</h4>
-                    <p className="text-gray-600">Showcase skills, portfolio, and pass coding tests.</p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="bg-primary-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">
-                    3
-                  </div>
-                  <div>
-                    <h4 className="font-bold mb-1">Apply to Jobs</h4>
-                    <p className="text-gray-600">Submit proposals and get hired based on merit.</p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="bg-primary-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">
-                    4
-                  </div>
-                  <div>
-                    <h4 className="font-bold mb-1">Deliver & Get Paid</h4>
-                    <p className="text-gray-600">Complete work, client approves, instant crypto payment.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <Box sx={{ mb: 6 }}>
+              <Typography variant="h5" fontWeight="bold" color="primary.main" gutterBottom sx={{ mb: 3 }}>
+                For Developers
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {[
+                  { step: 1, title: 'Connect Your Wallet', desc: 'No email, no password. Just your Web3 wallet.' },
+                  { step: 2, title: 'Build Your Profile', desc: 'Showcase skills, portfolio, and pass coding tests.' },
+                  { step: 3, title: 'Apply to Jobs', desc: 'Submit proposals and get hired based on merit.' },
+                  { step: 4, title: 'Deliver & Get Paid', desc: 'Complete work, client approves, instant crypto payment.' },
+                ].map((item) => (
+                  <Box key={item.step} sx={{ display: 'flex', gap: 2 }}>
+                    <Avatar sx={{ bgcolor: 'primary.main', width: 32, height: 32, flexShrink: 0 }}>
+                      {item.step}
+                    </Avatar>
+                    <Box>
+                      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                        {item.title}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {item.desc}
+                      </Typography>
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
 
             {/* For Clients */}
-            <div>
-              <h3 className="text-2xl font-bold mb-6 text-secondary-600">For Clients</h3>
-              <div className="space-y-4">
-                <div className="flex gap-4">
-                  <div className="bg-secondary-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">
-                    1
-                  </div>
-                  <div>
-                    <h4 className="font-bold mb-1">Verify Phone & Connect Wallet</h4>
-                    <p className="text-gray-600">Quick SMS verification and wallet connection.</p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="bg-secondary-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">
-                    2
-                  </div>
-                  <div>
-                    <h4 className="font-bold mb-1">Post Your Job</h4>
-                    <p className="text-gray-600">Describe your project, budget, and timeline.</p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="bg-secondary-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">
-                    3
-                  </div>
-                  <div>
-                    <h4 className="font-bold mb-1">Review Proposals</h4>
-                    <p className="text-gray-600">Choose the best developer based on skills and reputation.</p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="bg-secondary-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">
-                    4
-                  </div>
-                  <div>
-                    <h4 className="font-bold mb-1">Deposit 50% & Get Work Done</h4>
-                    <p className="text-gray-600">Escrow protects both parties. Pay remaining 50% on completion.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+            <Box>
+              <Typography variant="h5" fontWeight="bold" color="secondary.main" gutterBottom sx={{ mb: 3 }}>
+                For Clients
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {[
+                  { step: 1, title: 'Verify Phone & Connect Wallet', desc: 'Quick SMS verification and wallet connection.' },
+                  { step: 2, title: 'Post Your Job', desc: 'Describe your project, budget, and timeline.' },
+                  { step: 3, title: 'Review Proposals', desc: 'Choose the best developer based on skills and reputation.' },
+                  { step: 4, title: 'Deposit 50% & Get Work Done', desc: 'Escrow protects both parties. Pay remaining 50% on completion.' },
+                ].map((item) => (
+                  <Box key={item.step} sx={{ display: 'flex', gap: 2 }}>
+                    <Avatar sx={{ bgcolor: 'secondary.main', width: 32, height: 32, flexShrink: 0 }}>
+                      {item.step}
+                    </Avatar>
+                    <Box>
+                      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                        {item.title}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {item.desc}
+                      </Typography>
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+          </Box>
+        </Container>
+      </Box>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-r from-primary-600 to-secondary-600 text-white py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
-          <p className="text-xl mb-8">Join the future of freelancing today.</p>
-          <Link
-            href="/jobs"
-            className="btn bg-white text-primary-600 hover:bg-gray-100 px-8 py-3 text-lg inline-block"
-          >
-            Explore Jobs
-          </Link>
-        </div>
-      </section>
-    </div>
+      <Box
+        sx={{
+          background: 'linear-gradient(135deg, #0ea5e9 0%, #a855f7 100%)',
+          color: 'white',
+          py: 8,
+        }}
+      >
+        <Container maxWidth="lg">
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="h4" component="h2" fontWeight="bold" gutterBottom>
+              Ready to Get Started?
+            </Typography>
+            <Typography variant="h6" sx={{ mb: 4 }}>
+              Join the future of freelancing today.
+            </Typography>
+            <Button
+              component={Link}
+              href="/jobs"
+              variant="contained"
+              size="large"
+              sx={{
+                bgcolor: 'white',
+                color: 'primary.main',
+                px: 4,
+                py: 1.5,
+                fontSize: '1.125rem',
+                '&:hover': { bgcolor: 'grey.100' },
+              }}
+            >
+              Explore Jobs
+            </Button>
+          </Box>
+        </Container>
+      </Box>
+    </Box>
   );
 }
 

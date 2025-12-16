@@ -3,9 +3,19 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
-import { FaBell, FaEnvelope } from 'react-icons/fa';
+import { 
+  AppBar, 
+  Toolbar, 
+  Typography, 
+  Button, 
+  Box, 
+  Badge, 
+  IconButton,
+  Skeleton,
+  Container
+} from '@mui/material';
+import { Notifications, Mail } from '@mui/icons-material';
 import { useAuth } from '@/hooks/useAuth';
 
 export function Header() {
@@ -19,96 +29,131 @@ export function Header() {
   }, []);
 
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+    <AppBar position="sticky" sx={{ bgcolor: 'white', color: 'text.primary', boxShadow: 2 }}>
+      <Container maxWidth="xl">
+        <Toolbar sx={{ justifyContent: 'space-between', minHeight: '64px !important' }}>
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-bold text-xl px-3 py-1 rounded">
+          <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Box
+              sx={{
+                background: 'linear-gradient(135deg, #0ea5e9 0%, #a855f7 100%)',
+                color: 'white',
+                fontWeight: 'bold',
+                fontSize: '1.25rem',
+                px: 1.5,
+                py: 0.5,
+                borderRadius: 1,
+              }}
+            >
               DFM
-            </div>
-            <span className="font-bold text-lg hidden sm:inline">
+            </Box>
+            <Typography
+              variant="h6"
+              component="span"
+              sx={{
+                fontWeight: 'bold',
+                display: { xs: 'none', sm: 'inline' },
+                color: 'text.primary',
+              }}
+            >
               Freelance Marketplace
-            </span>
+            </Typography>
           </Link>
 
           {/* Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
-            <Link href="/jobs" className="text-gray-700 hover:text-primary-600 font-medium">
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 3 }}>
+            <Button component={Link} href="/jobs" color="inherit" sx={{ fontWeight: 500 }}>
               Find Work
-            </Link>
-            <Link href="/post-job" className="text-gray-700 hover:text-primary-600 font-medium">
+            </Button>
+            <Button component={Link} href="/post-job" color="inherit" sx={{ fontWeight: 500 }}>
               Post Job
-            </Link>
-            <Link href="/my-jobs" className="text-gray-700 hover:text-primary-600 font-medium">
+            </Button>
+            <Button component={Link} href="/my-jobs" color="inherit" sx={{ fontWeight: 500 }}>
               My Jobs
-            </Link>
+            </Button>
             {mounted && isConnected && (
               <>
-                <Link href="/messages" className="text-gray-700 hover:text-primary-600 relative">
-                  <FaEnvelope className="text-xl" />
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                    0
-                  </span>
-                </Link>
-                <Link href="/notifications" className="text-gray-700 hover:text-primary-600 relative">
-                  <FaBell className="text-xl" />
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                    0
-                  </span>
-                </Link>
+                <IconButton component={Link} href="/messages" color="inherit">
+                  <Badge badgeContent={0} color="error">
+                    <Mail />
+                  </Badge>
+                </IconButton>
+                <IconButton component={Link} href="/notifications" color="inherit">
+                  <Badge badgeContent={0} color="error">
+                    <Notifications />
+                  </Badge>
+                </IconButton>
               </>
             )}
-          </nav>
+          </Box>
 
           {/* Auth Buttons */}
-          <div className="flex items-center space-x-4">
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             {!mounted || authLoading ? (
-              // Show placeholder during hydration to prevent mismatch
               <>
-                <div className="w-16 h-8 bg-gray-200 rounded animate-pulse"></div>
-                <div className="w-20 h-8 bg-gray-200 rounded animate-pulse"></div>
-                <ConnectButton />
+                <Skeleton variant="rectangular" width={64} height={32} sx={{ borderRadius: 1 }} />
+                <Skeleton variant="rectangular" width={80} height={32} sx={{ borderRadius: 1 }} />
               </>
             ) : isAuthenticated ? (
               <>
                 {user && (
-                  <div className="hidden sm:block text-sm text-gray-700">
+                  <Typography
+                    component={Link}
+                    href="/profile/settings"
+                    sx={{
+                      display: { xs: 'none', sm: 'block' },
+                      fontSize: '0.875rem',
+                      color: 'text.secondary',
+                      textDecoration: 'none',
+                      '&:hover': { color: 'primary.main' },
+                    }}
+                  >
                     {user.displayName || user.username || user.email}
-                  </div>
+                  </Typography>
                 )}
-                <button
+                <Button
+                  component={Link}
+                  href="/profile/settings"
+                  color="inherit"
+                  sx={{ fontSize: '0.875rem' }}
+                >
+                  Profile
+                </Button>
+                <Button
                   onClick={() => {
                     logout();
                     router.push('/');
                   }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600"
+                  color="inherit"
+                  sx={{ fontSize: '0.875rem' }}
                 >
                   Logout
-                </button>
-                <ConnectButton />
+                </Button>
               </>
             ) : (
               <>
-                <Link
+                <Button
+                  component={Link}
                   href="/signin"
-                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600"
+                  color="inherit"
+                  sx={{ fontSize: '0.875rem' }}
                 >
                   Sign In
-                </Link>
-                <Link
+                </Button>
+                <Button
+                  component={Link}
                   href="/signup"
-                  className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md"
+                  variant="contained"
+                  sx={{ fontSize: '0.875rem' }}
                 >
                   Sign Up
-                </Link>
-                <ConnectButton />
+                </Button>
               </>
             )}
-          </div>
-        </div>
-      </div>
-    </header>
+          </Box>
+        </Toolbar>
+      </Container>
+    </AppBar>
   );
 }
 

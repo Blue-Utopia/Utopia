@@ -4,6 +4,21 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import toast from 'react-hot-toast';
+import {
+  Container,
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
+  Alert,
+  Grid,
+} from '@mui/material';
 
 export default function PostJobPage() {
   const router = useRouter();
@@ -36,7 +51,7 @@ export default function PostJobPage() {
     try {
       // TODO: Submit to GraphQL API
       console.log('Submitting job:', formData);
-      
+
       toast.success('Job posted successfully!');
       router.push('/my-jobs');
     } catch (error: any) {
@@ -48,166 +63,153 @@ export default function PostJobPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-3xl">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">Post a Job</h1>
-          <p className="text-gray-600">
+    <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50', py: 4 }}>
+      <Container maxWidth="md">
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h3" component="h1" fontWeight="bold" gutterBottom>
+            Post a Job
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
             Find the perfect freelancer for your project.
-          </p>
-        </div>
+          </Typography>
+        </Box>
 
-        <form onSubmit={handleSubmit} className="card space-y-6">
-          {/* Title */}
-          <div>
-            <label className="label">Job Title *</label>
-            <input
-              type="text"
-              required
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="e.g., Full Stack Developer for DeFi Project"
-              className="input"
-            />
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className="label">Description *</label>
-            <textarea
-              required
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Describe your project in detail..."
-              rows={6}
-              className="input"
-            />
-          </div>
-
-          {/* Category */}
-          <div>
-            <label className="label">Category *</label>
-            <select
-              required
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="input"
-            >
-              <option value="development">Development</option>
-              <option value="design">Design</option>
-              <option value="security">Security</option>
-              <option value="marketing">Marketing</option>
-              <option value="writing">Writing</option>
-            </select>
-          </div>
-
-          {/* Budget and Currency */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="label">Budget (USD) *</label>
-              <input
-                type="number"
+        <Card>
+          <CardContent>
+            <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              {/* Title */}
+              <TextField
+                label="Job Title"
                 required
-                min="1"
-                value={formData.budget}
-                onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-                placeholder="5000"
-                className="input"
+                fullWidth
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="e.g., Full Stack Developer for DeFi Project"
               />
-            </div>
-            <div>
-              <label className="label">Payment Currency *</label>
-              <select
+
+              {/* Description */}
+              <TextField
+                label="Description"
                 required
-                value={formData.currency}
-                onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                className="input"
-              >
-                <option value="USDC">USDC</option>
-                <option value="USDT">USDT</option>
-                <option value="ETH">ETH</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Duration and Deadline */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="label">Estimated Duration (days)</label>
-              <input
-                type="number"
-                min="1"
-                value={formData.estimatedDuration}
-                onChange={(e) => setFormData({ ...formData, estimatedDuration: e.target.value })}
-                placeholder="30"
-                className="input"
+                fullWidth
+                multiline
+                rows={6}
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Describe your project in detail..."
               />
-            </div>
-            <div>
-              <label className="label">Deadline</label>
-              <input
-                type="date"
-                value={formData.deadline}
-                onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-                className="input"
+
+              {/* Category */}
+              <FormControl fullWidth>
+                <InputLabel>Category</InputLabel>
+                <Select
+                  required
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  label="Category"
+                >
+                  <MenuItem value="development">Development</MenuItem>
+                  <MenuItem value="design">Design</MenuItem>
+                  <MenuItem value="security">Security</MenuItem>
+                  <MenuItem value="marketing">Marketing</MenuItem>
+                  <MenuItem value="writing">Writing</MenuItem>
+                </Select>
+              </FormControl>
+
+              {/* Budget and Currency */}
+              <Grid container spacing={2}>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <TextField
+                    label="Budget (USD)"
+                    type="number"
+                    required
+                    fullWidth
+                    inputProps={{ min: 1 }}
+                    value={formData.budget}
+                    onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
+                    placeholder="5000"
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <FormControl fullWidth>
+                    <InputLabel>Payment Currency</InputLabel>
+                    <Select
+                      required
+                      value={formData.currency}
+                      onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                      label="Payment Currency"
+                    >
+                      <MenuItem value="USDC">USDC</MenuItem>
+                      <MenuItem value="USDT">USDT</MenuItem>
+                      <MenuItem value="ETH">ETH</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+
+              {/* Duration and Deadline */}
+              <Grid container spacing={2}>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <TextField
+                    label="Estimated Duration (days)"
+                    type="number"
+                    fullWidth
+                    inputProps={{ min: 1 }}
+                    value={formData.estimatedDuration}
+                    onChange={(e) => setFormData({ ...formData, estimatedDuration: e.target.value })}
+                    placeholder="30"
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <TextField
+                    label="Deadline"
+                    type="date"
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    value={formData.deadline}
+                    onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+                  />
+                </Grid>
+              </Grid>
+
+              {/* Required Skills */}
+              <TextField
+                label="Required Skills"
+                required
+                fullWidth
+                value={formData.requiredSkills}
+                onChange={(e) => setFormData({ ...formData, requiredSkills: e.target.value })}
+                placeholder="React, Node.js, Solidity (comma separated)"
+                helperText="Separate skills with commas"
               />
-            </div>
-          </div>
 
-          {/* Required Skills */}
-          <div>
-            <label className="label">Required Skills *</label>
-            <input
-              type="text"
-              required
-              value={formData.requiredSkills}
-              onChange={(e) => setFormData({ ...formData, requiredSkills: e.target.value })}
-              placeholder="React, Node.js, Solidity (comma separated)"
-              className="input"
-            />
-            <p className="text-sm text-gray-500 mt-1">Separate skills with commas</p>
-          </div>
+              {/* Tags */}
+              <TextField
+                label="Tags"
+                fullWidth
+                value={formData.tags}
+                onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                placeholder="web3, defi, frontend (comma separated)"
+              />
 
-          {/* Tags */}
-          <div>
-            <label className="label">Tags</label>
-            <input
-              type="text"
-              value={formData.tags}
-              onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-              placeholder="web3, defi, frontend (comma separated)"
-              className="input"
-            />
-          </div>
+              {/* Info */}
+              <Alert severity="info">
+                <strong>Note:</strong> After posting, you'll need to deposit 50% of the budget into escrow before work can begin.
+              </Alert>
 
-          {/* Submit Button */}
-          <div className="flex gap-4 pt-4">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="btn btn-primary flex-1"
-            >
-              {isSubmitting ? 'Posting...' : 'Post Job'}
-            </button>
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="btn btn-secondary"
-            >
-              Cancel
-            </button>
-          </div>
-
-          {/* Info */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-800">
-              <strong>Note:</strong> After posting, you'll need to deposit 50% of the budget
-              into escrow before work can begin.
-            </p>
-          </div>
-        </form>
-      </div>
-    </div>
+              {/* Submit Button */}
+              <Box sx={{ display: 'flex', gap: 2, pt: 2 }}>
+                <Button type="submit" variant="contained" disabled={isSubmitting} sx={{ flex: 1 }}>
+                  {isSubmitting ? 'Posting...' : 'Post Job'}
+                </Button>
+                <Button type="button" variant="outlined" onClick={() => router.back()}>
+                  Cancel
+                </Button>
+              </Box>
+            </Box>
+          </CardContent>
+        </Card>
+      </Container>
+    </Box>
   );
 }
-

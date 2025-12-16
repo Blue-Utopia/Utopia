@@ -1,124 +1,150 @@
+'use client';
+
 import Link from 'next/link';
-import { FaGithub, FaTwitter, FaDiscord, FaTelegram } from 'react-icons/fa';
+import { Box, Container, Typography, IconButton, Divider, Grid } from '@mui/material';
+import { GitHub, Twitter, Telegram } from '@mui/icons-material';
 
 export function Footer() {
   return (
-    <footer className="bg-gray-900 text-white">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid md:grid-cols-4 gap-8">
+    <Box component="footer" sx={{ bgcolor: 'grey.900', color: 'white', py: 6 }}>
+      <Container maxWidth="lg">
+        <Grid container spacing={4}>
           {/* About */}
-          <div>
-            <h3 className="font-bold text-lg mb-4">About</h3>
-            <p className="text-gray-400 text-sm">
-              A decentralized freelance marketplace powered by blockchain technology.
-              Work freely, get paid instantly.
-            </p>
-          </div>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Typography variant="h6" fontWeight="bold" gutterBottom>
+              About
+            </Typography>
+            <Typography variant="body2" color="grey.400">
+              A decentralized freelance marketplace powered by blockchain technology. Work freely, get paid instantly.
+            </Typography>
+          </Grid>
 
           {/* For Freelancers */}
-          <div>
-            <h3 className="font-bold text-lg mb-4">For Freelancers</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link href="/jobs" className="text-gray-400 hover:text-white">
-                  Find Work
-                </Link>
-              </li>
-              <li>
-                <Link href="/how-it-works" className="text-gray-400 hover:text-white">
-                  How It Works
-                </Link>
-              </li>
-              <li>
-                <Link href="/skills" className="text-gray-400 hover:text-white">
-                  Skill Tests
-                </Link>
-              </li>
-              <li>
-                <Link href="/success-stories" className="text-gray-400 hover:text-white">
-                  Success Stories
-                </Link>
-              </li>
-            </ul>
-          </div>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Typography variant="h6" fontWeight="bold" gutterBottom>
+              For Freelancers
+            </Typography>
+            <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>
+              {[
+                { href: '/jobs', label: 'Find Work' },
+                { href: '/how-it-works', label: 'How It Works' },
+                { href: '/skills', label: 'Skill Tests' },
+                { href: '/success-stories', label: 'Success Stories' },
+              ].map((item) => (
+                <li key={item.href}>
+                  <Typography
+                    component={Link}
+                    href={item.href}
+                    variant="body2"
+                    sx={{ color: 'grey.400', textDecoration: 'none', '&:hover': { color: 'white' } }}
+                  >
+                    {item.label}
+                  </Typography>
+                </li>
+              ))}
+            </Box>
+          </Grid>
 
           {/* For Clients */}
-          <div>
-            <h3 className="font-bold text-lg mb-4">For Clients</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link href="/post-job" className="text-gray-400 hover:text-white">
-                  Post a Job
-                </Link>
-              </li>
-              <li>
-                <Link href="/browse-talent" className="text-gray-400 hover:text-white">
-                  Browse Talent
-                </Link>
-              </li>
-              <li>
-                <Link href="/enterprise" className="text-gray-400 hover:text-white">
-                  Enterprise
-                </Link>
-              </li>
-              <li>
-                <Link href="/pricing" className="text-gray-400 hover:text-white">
-                  Pricing
-                </Link>
-              </li>
-            </ul>
-          </div>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Typography variant="h6" fontWeight="bold" gutterBottom>
+              For Clients
+            </Typography>
+            <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>
+              {[
+                { href: '/post-job', label: 'Post a Job' },
+                { href: '/browse-talent', label: 'Browse Talent' },
+                { href: '/enterprise', label: 'Enterprise' },
+                { href: '/pricing', label: 'Pricing' },
+              ].map((item) => (
+                <li key={item.href}>
+                  <Typography
+                    component={Link}
+                    href={item.href}
+                    variant="body2"
+                    sx={{ color: 'grey.400', textDecoration: 'none', '&:hover': { color: 'white' } }}
+                  >
+                    {item.label}
+                  </Typography>
+                </li>
+              ))}
+            </Box>
+          </Grid>
 
           {/* Support */}
-          <div>
-            <h3 className="font-bold text-lg mb-4">Support</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link href="/help" className="text-gray-400 hover:text-white">
-                  Help Center
-                </Link>
-              </li>
-              <li>
-                <Link href="/docs" className="text-gray-400 hover:text-white">
-                  Documentation
-                </Link>
-              </li>
-              <li>
-                <Link href="/faq" className="text-gray-400 hover:text-white">
-                  FAQ
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="text-gray-400 hover:text-white">
-                  Contact Us
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </div>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Typography variant="h6" fontWeight="bold" gutterBottom>
+              Support
+            </Typography>
+            <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>
+              {[
+                { href: '/help', label: 'Help Center' },
+                { href: '/docs', label: 'Documentation' },
+                { href: '/faq', label: 'FAQ' },
+                { href: '/contact', label: 'Contact Us' },
+              ].map((item) => (
+                <li key={item.href}>
+                  <Typography
+                    component={Link}
+                    href={item.href}
+                    variant="body2"
+                    sx={{ color: 'grey.400', textDecoration: 'none', '&:hover': { color: 'white' } }}
+                  >
+                    {item.label}
+                  </Typography>
+                </li>
+              ))}
+            </Box>
+          </Grid>
+        </Grid>
 
         {/* Social Links & Copyright */}
-        <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <div className="flex space-x-6 mb-4 md:mb-0">
-            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">
-              <FaGithub className="text-2xl" />
-            </a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">
-              <FaTwitter className="text-2xl" />
-            </a>
-            <a href="https://discord.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">
-              <FaDiscord className="text-2xl" />
-            </a>
-            <a href="https://telegram.org" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">
-              <FaTelegram className="text-2xl" />
-            </a>
-          </div>
-          <div className="text-gray-400 text-sm">
+        <Divider sx={{ borderColor: 'grey.800', my: 4 }} />
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <IconButton
+              component="a"
+              href="https://github.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ color: 'grey.400', '&:hover': { color: 'white' } }}
+            >
+              <GitHub />
+            </IconButton>
+            <IconButton
+              component="a"
+              href="https://twitter.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ color: 'grey.400', '&:hover': { color: 'white' } }}
+            >
+              <Twitter />
+            </IconButton>
+            <IconButton
+              component="a"
+              href="https://discord.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ color: 'grey.400', '&:hover': { color: 'white' } }}
+            >
+              <Box component="span" sx={{ fontSize: '1.5rem' }}>D</Box>
+            </IconButton>
+            <IconButton
+              component="a"
+              href="https://telegram.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ color: 'grey.400', '&:hover': { color: 'white' } }}
+            >
+              <Telegram />
+            </IconButton>
+          </Box>
+          <Typography variant="body2" color="grey.400">
             © 2024 Decentralized Freelance Marketplace. All rights reserved.
-          </div>
-        </div>
-      </div>
-    </footer>
+          </Typography>
+        </Box>
+      </Container>
+    </Box>
   );
 }
 
