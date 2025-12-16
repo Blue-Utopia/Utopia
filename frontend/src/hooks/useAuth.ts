@@ -16,6 +16,7 @@ export function useAuth() {
     signin: contextSignin,
     logout: contextLogout,
     setAuthenticated,
+    refreshUser,
   } = useAuthContext();
 
   const authenticate = async () => {
@@ -81,5 +82,6 @@ export function useAuth() {
     signup,
     signin,
     logout,
+    refreshUser,
   };
 }

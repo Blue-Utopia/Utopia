@@ -10,6 +10,8 @@ interface User {
   username?: string;
   displayName?: string;
   walletAddress?: string;
+  avatar?: string;
+  role?: string;
 }
 
 interface AuthResponse {
@@ -25,6 +27,7 @@ interface AuthContextType {
   signin: (email: string, password: string) => Promise<void>;
   logout: () => void;
   setAuthenticated: (token: string, user: User) => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -68,7 +71,9 @@ async function fetchUser(): Promise<User | null> {
               email
               username
               displayName
+              avatar
               walletAddress
+              role
             }
           }
         `,
@@ -221,6 +226,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  // Refresh user data - force refetch and update cache
+  const refreshUser = async () => {
+    console.log('Refreshing user data...');
+    // Invalidate and force refetch
+    await queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEY });
+    const newData = await queryClient.refetchQueries({ 
+      queryKey: AUTH_QUERY_KEY,
+      type: 'active',
+    });
+    console.log('User data refreshed:', newData);
+    
+    // Also manually fetch and update cache to ensure it's fresh
+    const { token, hasToken } = checkAuthToken();
+    if (hasToken) {
+      const user = await fetchUser();
+      console.log('Fetched user:', user);
+      queryClient.setQueryData(AUTH_QUERY_KEY, {
+        isAuthenticated: true,
+        user: user || null,
+        token,
+      });
+    }
+  };
+
   const value: AuthContextType = {
     isAuthenticated: authData?.isAuthenticated ?? false,
     isLoading: isLoading || signupMutation.isPending || signinMutation.isPending,
@@ -229,6 +258,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signin,
     logout,
     setAuthenticated,
+    refreshUser,
   };
 
   return (

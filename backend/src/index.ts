@@ -9,6 +9,8 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { WebSocketServer } from 'ws';
 import rateLimit from 'express-rate-limit';
+import fs from 'fs';
+import path from 'path';
 
 import { typeDefs } from './graphql/schema';
 import { resolvers } from './graphql/resolvers';
@@ -48,6 +50,73 @@ async function startServer() {
   app.use(cors({ origin: CORS_ORIGIN, credentials: true }));
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+  
+  // Ensure uploads directory exists (match the path used in multer)
+  // Multer uses: path.join(__dirname, '../../uploads') from routes/upload.ts
+  // When compiled, __dirname is backend/dist, so '../../uploads' = backend/uploads
+  // When running from src, __dirname is backend/src, so '../../uploads' = backend/uploads
+  const uploadsDir = path.join(__dirname, '../uploads');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+    console.log('Created uploads directory:', uploadsDir);
+  }
+  
+  console.log('Serving static files from:', uploadsDir);
+  console.log('Uploads directory exists:', fs.existsSync(uploadsDir));
+  
+  // Serve uploaded files statically with proper CORS headers
+  // Use a custom middleware to set CORS headers before serving static files
+  app.use('/uploads', (req, res, next): void => {
+    // Get the origin from the request
+    const origin = req.headers.origin;
+    // Allow requests from any localhost port or the configured CORS_ORIGIN
+    // In development, allow all localhost origins
+    const allowedOrigin = origin && (
+      origin.includes('localhost') || 
+      origin.includes('127.0.0.1') ||
+      origin === CORS_ORIGIN
+    ) ? origin : CORS_ORIGIN;
+    
+    // Set CORS headers for all requests to /uploads
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+    res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    // These headers help with cross-origin resource sharing
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.setHeader('Cross-Origin-Embedder-Policy', 'unsafe-none');
+    
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+      res.sendStatus(200);
+      return;
+    }
+    
+    next();
+  });
+  
+  // Now serve static files with additional headers
+  app.use('/uploads', express.static(uploadsDir, {
+    setHeaders: (res, filePath) => {
+      // Set CORS headers again in setHeaders (static middleware runs after our middleware)
+      const origin = (res as any).req?.headers?.origin;
+      const allowedOrigin = origin && (
+        origin.includes('localhost') || 
+        origin.includes('127.0.0.1') ||
+        origin === CORS_ORIGIN
+      ) ? origin : CORS_ORIGIN;
+      
+      res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+      res.setHeader('Cross-Origin-Embedder-Policy', 'unsafe-none');
+      
+      // Cache images for 1 year
+      if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg') || filePath.endsWith('.png') || filePath.endsWith('.gif') || filePath.endsWith('.webp')) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000');
+      }
+    },
+  }));
 
   // Rate limiting
   const limiter = rateLimit({
