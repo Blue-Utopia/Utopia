@@ -1,6 +1,7 @@
 import { Context } from '../../context';
 import { verifyMessage } from 'ethers';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -76,6 +77,134 @@ export const userResolvers = {
       } catch (error) {
         console.error('Authentication error:', error);
         throw new Error('Authentication failed');
+      }
+    },
+
+    signup: async (
+      _: any,
+      { email, password, username, displayName }: any,
+      context: Context
+    ) => {
+      try {
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          throw new Error('Invalid email format');
+        }
+
+        // Validate password strength
+        if (password.length < 8) {
+          throw new Error('Password must be at least 8 characters long');
+        }
+
+        // Check if user already exists
+        const existingUser = await context.prisma.user.findFirst({
+          where: {
+            OR: [
+              { email: email.toLowerCase() },
+              ...(username ? [{ username }] : []),
+            ],
+          },
+        });
+
+        if (existingUser) {
+          if (existingUser.email === email.toLowerCase()) {
+            throw new Error('User with this email already exists');
+          }
+          if (username && existingUser.username === username) {
+            throw new Error('Username already taken');
+          }
+        }
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create user
+        const user = await context.prisma.user.create({
+          data: {
+            email: email.toLowerCase(),
+            password: hashedPassword,
+            username: username || null,
+            displayName: displayName || null,
+            lastActiveAt: new Date(),
+          },
+        });
+
+        // Generate JWT token
+        const token = jwt.sign(
+          {
+            userId: user.id,
+            email: user.email,
+          },
+          JWT_SECRET,
+          { expiresIn: '7d' }
+        );
+
+        // Remove password from response
+        const { password: _, ...userWithoutPassword } = user;
+
+        return {
+          token,
+          user: userWithoutPassword,
+        };
+      } catch (error: any) {
+        console.error('Signup error:', error);
+        throw new Error(error.message || 'Signup failed');
+      }
+    },
+
+    signin: async (
+      _: any,
+      { email, password }: any,
+      context: Context
+    ) => {
+      try {
+        // Find user by email
+        const user = await context.prisma.user.findUnique({
+          where: { email: email.toLowerCase() },
+        });
+
+        if (!user) {
+          throw new Error('Invalid email or password');
+        }
+
+        // Check if user has a password (email/password user)
+        if (!user.password) {
+          throw new Error('Please sign in with your wallet or reset your password');
+        }
+
+        // Verify password
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        if (!isValidPassword) {
+          throw new Error('Invalid email or password');
+        }
+
+        // Update last active
+        await context.prisma.user.update({
+          where: { id: user.id },
+          data: { lastActiveAt: new Date() },
+        });
+
+        // Generate JWT token
+        const token = jwt.sign(
+          {
+            userId: user.id,
+            email: user.email,
+          },
+          JWT_SECRET,
+          { expiresIn: '7d' }
+        );
+
+        // Remove password from response
+        const { password: _, ...userWithoutPassword } = user;
+
+        return {
+          token,
+          user: userWithoutPassword,
+        };
+      } catch (error: any) {
+        console.error('Signin error:', error);
+        throw new Error(error.message || 'Signin failed');
       }
     },
 

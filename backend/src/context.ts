@@ -9,7 +9,8 @@ export interface Context {
   prisma: PrismaClient;
   user: {
     id: string;
-    walletAddress: string;
+    walletAddress?: string;
+    email?: string;
   } | null;
 }
 
@@ -24,6 +25,7 @@ export async function createContext(req: Request): Promise<Context> {
       user = {
         id: decoded.userId,
         walletAddress: decoded.walletAddress,
+        email: decoded.email,
       };
     } catch (error) {
       console.error('Invalid token:', error);

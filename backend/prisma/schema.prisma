@@ -1,5 +1,3 @@
-// Prisma schema for decentralized freelance marketplace
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,6 +5,248 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String             @id @default(cuid())
+  walletAddress      String?            @unique
+  username           String?            @unique
+  email              String?            @unique
+  password           String?            // Hashed password for email/password auth
+  phoneNumber        String?            @unique
+  phoneVerified      Boolean            @default(false)
+  role               UserRole           @default(BOTH)
+  displayName        String?
+  bio                String?
+  avatar             String?
+  location           String?
+  timezone           String?
+  isVerified         Boolean            @default(false)
+  verificationStatus VerificationStatus @default(PENDING)
+  reputationAddress  String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  lastActiveAt       DateTime           @default(now())
+  jobsAsClient       Job[]              @relation("ClientJobs")
+  jobsAsDeveloper    Job[]              @relation("DeveloperJobs")
+  receivedMessages   Message[]          @relation("ReceivedMessages")
+  sentMessages       Message[]          @relation("SentMessages")
+  notifications      Notification[]
+  portfolioItems     Portfolio[]
+  proposals          Proposal[]
+  reviewsReceived    Review[]           @relation("ReviewsReceived")
+  reviewsGiven       Review[]           @relation("ReviewsGiven")
+  skillTests         SkillTest[]
+  skills             UserSkill[]
+
+  @@index([walletAddress])
+  @@index([email])
+  @@index([username])
+  @@index([phoneNumber])
+}
+
+model Job {
+  id                String      @id @default(cuid())
+  title             String
+  description       String
+  category          String
+  budget            Float
+  currency          String      @default("USDC")
+  paymentToken      String
+  escrowAddress     String?
+  blockchainJobId   Int?
+  estimatedDuration Int?
+  deadline          DateTime?
+  status            JobStatus   @default(DRAFT)
+  clientId          String
+  developerId       String?
+  tags              String[]
+  attachments       String[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  publishedAt       DateTime?
+  startedAt         DateTime?
+  completedAt       DateTime?
+  client            User        @relation("ClientJobs", fields: [clientId], references: [id])
+  developer         User?       @relation("DeveloperJobs", fields: [developerId], references: [id])
+  requiredSkills    JobSkill[]
+  messages          Message[]
+  milestones        Milestone[]
+  proposals         Proposal[]
+  reviews           Review[]
+
+  @@index([clientId])
+  @@index([developerId])
+  @@index([status])
+  @@index([category])
+  @@index([createdAt])
+}
+
+model Proposal {
+  id               String         @id @default(cuid())
+  jobId            String
+  developerId      String
+  coverLetter      String
+  proposedBudget   Float
+  proposedDuration Int?
+  status           ProposalStatus @default(PENDING)
+  attachments      String[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  developer        User           @relation(fields: [developerId], references: [id])
+  job              Job            @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, developerId])
+  @@index([jobId])
+  @@index([developerId])
+  @@index([status])
+}
+
+model Skill {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  category    String
+  description String?
+  createdAt   DateTime    @default(now())
+  jobSkills   JobSkill[]
+  skillTests  SkillTest[]
+  userSkills  UserSkill[]
+
+  @@index([category])
+}
+
+model UserSkill {
+  id                String     @id @default(cuid())
+  userId            String
+  skillId           String
+  level             SkillLevel @default(INTERMEDIATE)
+  yearsOfExperience Float?
+  isVerified        Boolean    @default(false)
+  verifiedAt        DateTime?
+  createdAt         DateTime   @default(now())
+  skill             Skill      @relation(fields: [skillId], references: [id])
+  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, skillId])
+  @@index([userId])
+  @@index([skillId])
+}
+
+model JobSkill {
+  id       String     @id @default(cuid())
+  jobId    String
+  skillId  String
+  required Boolean    @default(true)
+  level    SkillLevel @default(INTERMEDIATE)
+  job      Job        @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  skill    Skill      @relation(fields: [skillId], references: [id])
+
+  @@unique([jobId, skillId])
+  @@index([jobId])
+  @@index([skillId])
+}
+
+model Portfolio {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String
+  url         String?
+  images      String[]
+  tags        String[]
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model SkillTest {
+  id       String   @id @default(cuid())
+  userId   String
+  skillId  String
+  score    Float
+  maxScore Float    @default(100)
+  passed   Boolean
+  testData String?
+  takenAt  DateTime @default(now())
+  skill    Skill    @relation(fields: [skillId], references: [id])
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([skillId])
+}
+
+model Review {
+  id               String   @id @default(cuid())
+  jobId            String
+  reviewerId       String
+  revieweeId       String
+  rating           Int
+  comment          String?
+  blockchainTxHash String?
+  createdAt        DateTime @default(now())
+  job              Job      @relation(fields: [jobId], references: [id])
+  reviewee         User     @relation("ReviewsReceived", fields: [revieweeId], references: [id])
+  reviewer         User     @relation("ReviewsGiven", fields: [reviewerId], references: [id])
+
+  @@unique([jobId, reviewerId])
+  @@index([reviewerId])
+  @@index([revieweeId])
+  @@index([jobId])
+}
+
+model Milestone {
+  id          String    @id @default(cuid())
+  jobId       String
+  title       String
+  description String?
+  amount      Float
+  status      String    @default("pending")
+  dueDate     DateTime?
+  completedAt DateTime?
+  paidAt      DateTime?
+  createdAt   DateTime  @default(now())
+  job         Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+}
+
+model Message {
+  id          String    @id @default(cuid())
+  jobId       String
+  senderId    String
+  receiverId  String
+  content     String
+  attachments String[]
+  isRead      Boolean   @default(false)
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+  job         Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  receiver    User      @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  sender      User      @relation("SentMessages", fields: [senderId], references: [id])
+
+  @@index([jobId])
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  message   String
+  link      String?
+  metadata  String?
+  isRead    Boolean   @default(false)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([isRead])
 }
 
 enum UserRole {
@@ -44,306 +284,3 @@ enum SkillLevel {
   ADVANCED
   EXPERT
 }
-
-model User {
-  id                String   @id @default(cuid())
-  walletAddress     String   @unique
-  username          String?  @unique
-  email             String?
-  phoneNumber       String?  @unique
-  phoneVerified     Boolean  @default(false)
-  role              UserRole @default(BOTH)
-  
-  // Profile
-  displayName       String?
-  bio               String?
-  avatar            String?
-  location          String?
-  timezone          String?
-  
-  // Verification
-  isVerified        Boolean  @default(false)
-  verificationStatus VerificationStatus @default(PENDING)
-  
-  // On-chain data reference
-  reputationAddress String?
-  
-  // Timestamps
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  lastActiveAt      DateTime @default(now())
-  
-  // Relations
-  jobsAsClient      Job[]              @relation("ClientJobs")
-  jobsAsDeveloper   Job[]              @relation("DeveloperJobs")
-  proposals         Proposal[]
-  skills            UserSkill[]
-  portfolioItems    Portfolio[]
-  reviewsGiven      Review[]           @relation("ReviewsGiven")
-  reviewsReceived   Review[]           @relation("ReviewsReceived")
-  sentMessages      Message[]          @relation("SentMessages")
-  receivedMessages  Message[]          @relation("ReceivedMessages")
-  notifications     Notification[]
-  skillTests        SkillTest[]
-  
-  @@index([walletAddress])
-  @@index([username])
-  @@index([phoneNumber])
-}
-
-model Job {
-  id                String     @id @default(cuid())
-  title             String
-  description       String
-  category          String
-  budget            Float
-  currency          String     @default("USDC")
-  
-  // Payment details
-  paymentToken      String
-  escrowAddress     String?
-  blockchainJobId   Int?
-  
-  // Timeline
-  estimatedDuration Int?       // in days
-  deadline          DateTime?
-  
-  // Status
-  status            JobStatus  @default(DRAFT)
-  
-  // Relations
-  clientId          String
-  client            User       @relation("ClientJobs", fields: [clientId], references: [id])
-  
-  developerId       String?
-  developer         User?      @relation("DeveloperJobs", fields: [developerId], references: [id])
-  
-  proposals         Proposal[]
-  requiredSkills    JobSkill[]
-  milestones        Milestone[]
-  messages          Message[]
-  reviews           Review[]
-  
-  // Metadata
-  tags              String[]
-  attachments       String[]
-  
-  // Timestamps
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
-  publishedAt       DateTime?
-  startedAt         DateTime?
-  completedAt       DateTime?
-  
-  @@index([clientId])
-  @@index([developerId])
-  @@index([status])
-  @@index([category])
-  @@index([createdAt])
-}
-
-model Proposal {
-  id                String         @id @default(cuid())
-  jobId             String
-  job               Job            @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  
-  developerId       String
-  developer         User           @relation(fields: [developerId], references: [id])
-  
-  coverLetter       String
-  proposedBudget    Float
-  proposedDuration  Int?           // in days
-  status            ProposalStatus @default(PENDING)
-  
-  // Metadata
-  attachments       String[]
-  
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-  
-  @@unique([jobId, developerId])
-  @@index([jobId])
-  @@index([developerId])
-  @@index([status])
-}
-
-model Skill {
-  id          String      @id @default(cuid())
-  name        String      @unique
-  category    String
-  description String?
-  
-  userSkills  UserSkill[]
-  jobSkills   JobSkill[]
-  skillTests  SkillTest[]
-  
-  createdAt   DateTime    @default(now())
-  
-  @@index([category])
-}
-
-model UserSkill {
-  id          String     @id @default(cuid())
-  userId      String
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  skillId     String
-  skill       Skill      @relation(fields: [skillId], references: [id])
-  
-  level       SkillLevel @default(INTERMEDIATE)
-  yearsOfExperience Float?
-  
-  isVerified  Boolean    @default(false)
-  verifiedAt  DateTime?
-  
-  createdAt   DateTime   @default(now())
-  
-  @@unique([userId, skillId])
-  @@index([userId])
-  @@index([skillId])
-}
-
-model JobSkill {
-  id          String     @id @default(cuid())
-  jobId       String
-  job         Job        @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  
-  skillId     String
-  skill       Skill      @relation(fields: [skillId], references: [id])
-  
-  required    Boolean    @default(true)
-  level       SkillLevel @default(INTERMEDIATE)
-  
-  @@unique([jobId, skillId])
-  @@index([jobId])
-  @@index([skillId])
-}
-
-model Portfolio {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  title       String
-  description String
-  url         String?
-  images      String[]
-  tags        String[]
-  
-  createdAt   DateTime @default(now())
-  
-  @@index([userId])
-}
-
-model SkillTest {
-  id          String             @id @default(cuid())
-  userId      String
-  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  skillId     String
-  skill       Skill              @relation(fields: [skillId], references: [id])
-  
-  score       Float
-  maxScore    Float              @default(100)
-  passed      Boolean
-  
-  testData    String?            // JSON string containing test questions/answers
-  
-  takenAt     DateTime           @default(now())
-  
-  @@index([userId])
-  @@index([skillId])
-}
-
-model Review {
-  id          String   @id @default(cuid())
-  jobId       String
-  job         Job      @relation(fields: [jobId], references: [id])
-  
-  reviewerId  String
-  reviewer    User     @relation("ReviewsGiven", fields: [reviewerId], references: [id])
-  
-  revieweeId  String
-  reviewee    User     @relation("ReviewsReceived", fields: [revieweeId], references: [id])
-  
-  rating      Int      // 1-5 stars
-  comment     String?
-  
-  // On-chain reference
-  blockchainTxHash String?
-  
-  createdAt   DateTime @default(now())
-  
-  @@unique([jobId, reviewerId])
-  @@index([reviewerId])
-  @@index([revieweeId])
-  @@index([jobId])
-}
-
-model Milestone {
-  id          String    @id @default(cuid())
-  jobId       String
-  job         Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  
-  title       String
-  description String?
-  amount      Float
-  
-  status      String    @default("pending") // pending, in_progress, completed, paid
-  dueDate     DateTime?
-  
-  completedAt DateTime?
-  paidAt      DateTime?
-  
-  createdAt   DateTime  @default(now())
-  
-  @@index([jobId])
-}
-
-model Message {
-  id          String   @id @default(cuid())
-  jobId       String
-  job         Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  
-  senderId    String
-  sender      User     @relation("SentMessages", fields: [senderId], references: [id])
-  
-  receiverId  String
-  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
-  
-  content     String
-  attachments String[]
-  
-  isRead      Boolean  @default(false)
-  readAt      DateTime?
-  
-  createdAt   DateTime @default(now())
-  
-  @@index([jobId])
-  @@index([senderId])
-  @@index([receiverId])
-  @@index([createdAt])
-}
-
-model Notification {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  type        String   // job_posted, proposal_received, job_awarded, payment_received, etc.
-  title       String
-  message     String
-  
-  link        String?
-  metadata    String?  // JSON string for additional data
-  
-  isRead      Boolean  @default(false)
-  readAt      DateTime?
-  
-  createdAt   DateTime @default(now())
-  
-  @@index([userId])
-  @@index([createdAt])
-  @@index([isRead])
-}
-

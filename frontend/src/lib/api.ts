@@ -34,6 +34,20 @@ export const authApi = {
       body: JSON.stringify({ walletAddress, signature, message }),
     });
   },
+
+  signup: async (email: string, password: string, username?: string, displayName?: string) => {
+    return apiRequest('/api/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify({ email, password, username, displayName }),
+    });
+  },
+
+  signin: async (email: string, password: string) => {
+    return apiRequest('/api/auth/signin', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+  },
 };
 
 export const twilioApi = {

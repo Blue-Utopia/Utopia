@@ -331,6 +331,8 @@ export const typeDefs = gql`
   type Mutation {
     # Authentication
     authenticateWallet(walletAddress: String!, signature: String!, message: String!): AuthPayload!
+    signup(email: String!, password: String!, username: String, displayName: String): AuthPayload!
+    signin(email: String!, password: String!): AuthPayload!
     verifyPhone(phoneNumber: String!): Boolean!
     confirmPhoneCode(phoneNumber: String!, code: String!): Boolean!
     

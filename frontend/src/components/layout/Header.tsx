@@ -1,12 +1,22 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { FaBell, FaEnvelope } from 'react-icons/fa';
+import { useAuth } from '@/hooks/useAuth';
 
 export function Header() {
   const { isConnected } = useAccount();
+  const { isAuthenticated, user, logout, isLoading: authLoading } = useAuth();
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
@@ -33,7 +43,7 @@ export function Header() {
             <Link href="/my-jobs" className="text-gray-700 hover:text-primary-600 font-medium">
               My Jobs
             </Link>
-            {isConnected && (
+            {mounted && isConnected && (
               <>
                 <Link href="/messages" className="text-gray-700 hover:text-primary-600 relative">
                   <FaEnvelope className="text-xl" />
@@ -51,9 +61,50 @@ export function Header() {
             )}
           </nav>
 
-          {/* Connect Wallet Button */}
+          {/* Auth Buttons */}
           <div className="flex items-center space-x-4">
-            <ConnectButton />
+            {!mounted || authLoading ? (
+              // Show placeholder during hydration to prevent mismatch
+              <>
+                <div className="w-16 h-8 bg-gray-200 rounded animate-pulse"></div>
+                <div className="w-20 h-8 bg-gray-200 rounded animate-pulse"></div>
+                <ConnectButton />
+              </>
+            ) : isAuthenticated ? (
+              <>
+                {user && (
+                  <div className="hidden sm:block text-sm text-gray-700">
+                    {user.displayName || user.username || user.email}
+                  </div>
+                )}
+                <button
+                  onClick={() => {
+                    logout();
+                    router.push('/');
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600"
+                >
+                  Logout
+                </button>
+                <ConnectButton />
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/signin"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/signup"
+                  className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md"
+                >
+                  Sign Up
+                </Link>
+                <ConnectButton />
+              </>
+            )}
           </div>
         </div>
       </div>

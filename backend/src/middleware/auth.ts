@@ -6,7 +6,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 export interface AuthRequest extends Request {
   user?: {
     id: string;
-    walletAddress: string;
+    walletAddress?: string;
+    email?: string;
   };
 }
 
@@ -24,6 +25,7 @@ export function authenticateWallet(req: AuthRequest, res: Response, next: NextFu
     req.user = {
       id: decoded.userId,
       walletAddress: decoded.walletAddress,
+      email: decoded.email,
     };
 
     next();
@@ -41,6 +43,7 @@ export function optionalAuth(req: AuthRequest, _res: Response, next: NextFunctio
       req.user = {
         id: decoded.userId,
         walletAddress: decoded.walletAddress,
+        email: decoded.email,
       };
     }
 
