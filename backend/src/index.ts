@@ -13,7 +13,6 @@ import rateLimit from 'express-rate-limit';
 import { typeDefs } from './graphql/schema';
 import { resolvers } from './graphql/resolvers';
 import { createContext } from './context';
-import { authenticateWallet } from './middleware/auth';
 import { setupWebSocket } from './websocket';
 import { setupRoutes } from './routes';
 
@@ -59,7 +58,7 @@ async function startServer() {
   app.use('/api/', limiter);
 
   // Health check
-  app.get('/health', (req, res) => {
+  app.get('/health', (_req, res) => {
     res.json({ 
       status: 'healthy', 
       timestamp: new Date().toISOString(),
@@ -95,7 +94,7 @@ async function startServer() {
   );
 
   // Error handling middleware
-  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     console.error('Error:', err);
     res.status(err.status || 500).json({
       error: {

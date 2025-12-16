@@ -10,12 +10,13 @@ export interface AuthRequest extends Request {
   };
 }
 
-export function authenticateWallet(req: AuthRequest, res: Response, next: NextFunction) {
+export function authenticateWallet(req: AuthRequest, res: Response, next: NextFunction): void {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
 
     if (!token) {
-      return res.status(401).json({ error: 'No token provided' });
+      res.status(401).json({ error: 'No token provided' });
+      return;
     }
 
     const decoded = jwt.verify(token, JWT_SECRET) as any;
@@ -27,11 +28,11 @@ export function authenticateWallet(req: AuthRequest, res: Response, next: NextFu
 
     next();
   } catch (error) {
-    return res.status(401).json({ error: 'Invalid token' });
+    res.status(401).json({ error: 'Invalid token' });
   }
 }
 
-export function optionalAuth(req: AuthRequest, res: Response, next: NextFunction) {
+export function optionalAuth(req: AuthRequest, _res: Response, next: NextFunction): void {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
 
