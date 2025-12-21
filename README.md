@@ -130,7 +130,7 @@ cd frontend && npm run dev
 2. Connect wallet
 3. Post job with details
 4. Review proposals & hire developer
-5. Deposit 50% to escrow
+5. Deposit 50% to escrow(fixed, biweekly)
 6. Review work & release payment
 7. Leave rating
 
