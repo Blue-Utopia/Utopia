@@ -278,3 +278,5 @@ Contributors will be:
 
 Thank you for contributing! 🚀
 
+## Contributors
+James Balmeo Prince
