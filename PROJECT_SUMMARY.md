@@ -43,9 +43,9 @@ A fully functional decentralized freelance marketplace has been built with all t
 
 ### 4. Core User Flows
 - ✅ **For Developers**:
-  - Connect wallet (no KYC)
   - Build profile with portfolio
   - Take skill tests
+  - Connect wallet (no KYC)
   - Browse and apply to jobs
   - Receive instant crypto payments
   - Build on-chain reputation
