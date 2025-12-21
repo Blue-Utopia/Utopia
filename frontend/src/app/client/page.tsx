@@ -152,14 +152,14 @@ export default function ClientPage() {
       freelancer: {
         name: 'Jane Smith',
         avatar: '',
-        rating: 5.0,
-        completedJobs: 120,
+        rating: 4.9,
+        completedJobs: 67,
         location: 'Canada',
       },
       bid: 5200,
       currency: 'USDC',
       deliveryTime: '25 days',
-      coverLetter: 'I specialize in React and Solidity development...',
+      coverLetter: 'I specialize in blockchain development and have worked on multiple DeFi projects...',
       submittedAt: '5 hours ago',
       status: 'PENDING',
     },
@@ -172,12 +172,10 @@ export default function ClientPage() {
       avatar: '',
       rating: 4.9,
       jobTitle: 'UI/UX Designer for Web3 App',
-      jobId: '3',
       status: 'IN_PROGRESS',
       progress: 65,
       budget: 2500,
       currency: 'ETH',
-      startedAt: '1 week ago',
     },
     {
       id: '2',
@@ -185,31 +183,12 @@ export default function ClientPage() {
       avatar: '',
       rating: 4.7,
       jobTitle: 'Backend API Development',
-      jobId: '4',
       status: 'COMPLETED',
       progress: 100,
-      budget: 4000,
+      budget: 3500,
       currency: 'USDC',
-      completedAt: '2 weeks ago',
     },
   ];
-
-  if (!isAuthenticated) {
-    return (
-      <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50', py: 8 }}>
-        <Container maxWidth="lg">
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="h4" gutterBottom fontWeight="bold">
-              Please Connect Your Wallet
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-              You need to connect your wallet to access the client dashboard.
-            </Typography>
-          </Box>
-        </Container>
-      </Box>
-    );
-  }
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50', py: 4 }}>
@@ -969,4 +948,3 @@ function MessagesTab() {
     </Box>
   );
 }
-
