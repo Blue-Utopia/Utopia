@@ -118,8 +118,8 @@ cd frontend && npm run dev
 ## 📝 User Flows
 
 ### For Developers (Freelancers)
-1. Connect wallet → Create profile
-2. Complete skill verification
+1. Complete skill verification
+2. Connect wallet → Create profile
 3. Browse jobs & submit proposals
 4. Get hired & complete work
 5. Receive instant crypto payment
