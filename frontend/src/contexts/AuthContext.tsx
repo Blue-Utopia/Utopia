@@ -23,7 +23,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   user: User | null;
-  signup: (email: string, password: string, username?: string, displayName?: string) => Promise<void>;
+  signup: (email: string, password: string, username?: string, displayName?: string, role?: 'CLIENT' | 'DEVELOPER') => Promise<void>;
   signin: (email: string, password: string) => Promise<void>;
   logout: () => void;
   setAuthenticated: (token: string, user: User) => void;
@@ -131,13 +131,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
       username,
       displayName,
+      role,
     }: {
       email: string;
       password: string;
       username?: string;
       displayName?: string;
+      role?: 'CLIENT' | 'DEVELOPER';
     }): Promise<AuthResponse> => {
-      return authApi.signup(email, password, username, displayName);
+      return authApi.signup(email, password, username, displayName, role);
     },
     onSuccess: (data) => {
       // Store token
@@ -185,9 +187,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email: string,
     password: string,
     username?: string,
-    displayName?: string
+    displayName?: string,
+    role?: 'CLIENT' | 'DEVELOPER'
   ) => {
-    return signupMutation.mutateAsync({ email, password, username, displayName });
+    return signupMutation.mutateAsync({ email, password, username, displayName, role });
   };
 
   // Signin wrapper

@@ -35,10 +35,10 @@ export const authApi = {
     });
   },
 
-  signup: async (email: string, password: string, username?: string, displayName?: string) => {
+  signup: async (email: string, password: string, username?: string, displayName?: string, role?: 'CLIENT' | 'DEVELOPER') => {
     return apiRequest('/api/auth/signup', {
       method: 'POST',
-      body: JSON.stringify({ email, password, username, displayName }),
+      body: JSON.stringify({ email, password, username, displayName, role }),
     });
   },
 

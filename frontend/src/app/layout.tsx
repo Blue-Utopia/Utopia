@@ -19,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <style>{`
           @media (max-width: 768px) {
@@ -32,7 +32,7 @@ export default function RootLayout({
           }
         `}</style>
       </head>
-      <body className={inter.className}>
+      <body className={inter.className} suppressHydrationWarning>
         <Providers>
           <div className="flex flex-col min-h-screen">
             <Header />
