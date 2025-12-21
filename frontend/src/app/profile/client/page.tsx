@@ -22,6 +22,7 @@ import {
   Tabs,
   Tab,
   CircularProgress,
+  IconButton,
 } from '@mui/material';
 import {
   Work,
@@ -33,6 +34,12 @@ import {
   Assignment,
   Send,
   Star,
+  Add,
+  Message,
+  MoreVert,
+  PersonAdd,
+  Person,
+  ArrowForward,
 } from '@mui/icons-material';
 import { LazySection } from '@/components/LazySection';
 
@@ -104,7 +111,7 @@ const GET_CLIENT_PROFILE = gql`
   }
 `;
 
-type TabType = 'overview' | 'completed' | 'reviews';
+type TabType = 'dashboard-overview' | 'dashboard-jobs' | 'dashboard-proposals' | 'dashboard-freelancers' | 'dashboard-messages' | 'profile-overview' | 'profile-completed' | 'profile-reviews' | 'profile-settings';
 
 function TabPanel(props: { children?: React.ReactNode; value: number; index: number }) {
   const { children, value, index } = props;
@@ -114,7 +121,8 @@ function TabPanel(props: { children?: React.ReactNode; value: number; index: num
 export default function ClientProfilePage() {
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading, user } = useAuth();
-  const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const [activeTab, setActiveTab] = useState<TabType>('dashboard-overview');
+  const [activeSection, setActiveSection] = useState<'dashboard' | 'profile'>('dashboard');
 
   const { data, loading, error } = useQuery(GET_CLIENT_PROFILE, {
     skip: !isAuthenticated,
@@ -275,8 +283,8 @@ export default function ClientProfilePage() {
                 </Grid>
                 <Grid>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Button variant="contained" onClick={() => router.push('/client')}>
-                      Go to Dashboard
+                    <Button variant="contained" startIcon={<Work />} onClick={() => router.push('/post-job')}>
+                      Post a Job
                     </Button>
                     <Button variant="outlined" onClick={() => router.push('/profile/settings')}>
                       Edit Profile
@@ -288,92 +296,341 @@ export default function ClientProfilePage() {
           </Card>
         </LazySection>
 
-        {/* Quick Stats & Navigation */}
+        {/* Dashboard Stats Cards */}
         <LazySection>
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Grid container spacing={3} alignItems="center">
-                <Grid size={{ xs: 12, md: 8 }}>
-                  <Typography variant="h6" fontWeight="bold" gutterBottom>
-                    Profile Overview
-                  </Typography>
-                  <Grid container spacing={2} sx={{ mt: 1 }}>
-                    <Grid size={{ xs: 6, sm: 3 }}>
-                      <Typography variant="body2" color="text.secondary">
-                        Completed Jobs
-                      </Typography>
-                      <Typography variant="h5" fontWeight="bold">
-                        {completedJobs.length}
-                      </Typography>
-                    </Grid>
-                    <Grid size={{ xs: 6, sm: 3 }}>
-                      <Typography variant="body2" color="text.secondary">
-                        Total Spent
-                      </Typography>
-                      <Typography variant="h5" fontWeight="bold">
-                        ${totalSpent.toLocaleString()}
-                      </Typography>
-                    </Grid>
-                    <Grid size={{ xs: 6, sm: 3 }}>
-                      <Typography variant="body2" color="text.secondary">
-                        Reviews Given
-                      </Typography>
-                      <Typography variant="h5" fontWeight="bold">
-                        {client.reviewsGiven?.length || 0}
-                      </Typography>
-                    </Grid>
-                    <Grid size={{ xs: 6, sm: 3 }}>
-                      <Typography variant="body2" color="text.secondary">
+          <Grid container spacing={2.5} sx={{ mb: 4 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Card
+                sx={{
+                  borderRadius: 3,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                  transition: 'all 0.3s ease',
+                  border: '1px solid rgba(0,0,0,0.06)',
+                  height: '100%',
+                  '&:hover': {
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+                    transform: 'translateY(-2px)',
+                  },
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1 }}>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: 'text.secondary',
+                          fontWeight: 500,
+                          mb: 1.5,
+                          fontSize: '0.875rem',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px',
+                        }}
+                      >
                         Active Jobs
                       </Typography>
-                      <Typography variant="h5" fontWeight="bold">
+                      <Typography
+                        variant="h3"
+                        sx={{
+                          fontWeight: 700,
+                          color: 'text.primary',
+                          lineHeight: 1.2,
+                          mb: 0.5,
+                        }}
+                      >
                         {activeJobs.length}
                       </Typography>
-                    </Grid>
-                  </Grid>
-                </Grid>
-                <Grid size={{ xs: 12, md: 4 }}>
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    size="large"
-                    onClick={() => router.push('/client')}
-                    startIcon={<Work />}
-                    sx={{ mb: 1 }}
-                  >
-                    Go to Dashboard
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    fullWidth
-                    onClick={() => router.push('/profile/settings')}
-                  >
-                    Edit Profile Settings
-                  </Button>
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
+                    </Box>
+                    <Box
+                      sx={{
+                        bgcolor: 'primary.main',
+                        borderRadius: 2.5,
+                        p: 1.5,
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: 56,
+                        height: 56,
+                        boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
+                      }}
+                    >
+                      <Work sx={{ fontSize: 28 }} />
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Card
+                sx={{
+                  borderRadius: 3,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                  transition: 'all 0.3s ease',
+                  border: '1px solid rgba(0,0,0,0.06)',
+                  height: '100%',
+                  '&:hover': {
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+                    transform: 'translateY(-2px)',
+                  },
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1 }}>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: 'text.secondary',
+                          fontWeight: 500,
+                          mb: 1.5,
+                          fontSize: '0.875rem',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px',
+                        }}
+                      >
+                        Proposals Received
+                      </Typography>
+                      <Typography
+                        variant="h3"
+                        sx={{
+                          fontWeight: 700,
+                          color: 'text.primary',
+                          lineHeight: 1.2,
+                          mb: 0.5,
+                        }}
+                      >
+                        {allProposals.length}
+                      </Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        bgcolor: 'success.main',
+                        borderRadius: 2.5,
+                        p: 1.5,
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: 56,
+                        height: 56,
+                        boxShadow: '0 4px 12px rgba(46, 125, 50, 0.3)',
+                      }}
+                    >
+                      <Assignment sx={{ fontSize: 28 }} />
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Card
+                sx={{
+                  borderRadius: 3,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                  transition: 'all 0.3s ease',
+                  border: '1px solid rgba(0,0,0,0.06)',
+                  height: '100%',
+                  '&:hover': {
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+                    transform: 'translateY(-2px)',
+                  },
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1 }}>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: 'text.secondary',
+                          fontWeight: 500,
+                          mb: 1.5,
+                          fontSize: '0.875rem',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px',
+                        }}
+                      >
+                        Hired Freelancers
+                      </Typography>
+                      <Typography
+                        variant="h3"
+                        sx={{
+                          fontWeight: 700,
+                          color: 'text.primary',
+                          lineHeight: 1.2,
+                          mb: 0.5,
+                        }}
+                      >
+                        {hiredFreelancers.length}
+                      </Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        bgcolor: 'info.main',
+                        borderRadius: 2.5,
+                        p: 1.5,
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: 56,
+                        height: 56,
+                        boxShadow: '0 4px 12px rgba(2, 136, 209, 0.3)',
+                      }}
+                    >
+                      <People sx={{ fontSize: 28 }} />
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Card
+                sx={{
+                  borderRadius: 3,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                  transition: 'all 0.3s ease',
+                  border: '1px solid rgba(0,0,0,0.06)',
+                  height: '100%',
+                  '&:hover': {
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+                    transform: 'translateY(-2px)',
+                  },
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1 }}>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: 'text.secondary',
+                          fontWeight: 500,
+                          mb: 1.5,
+                          fontSize: '0.875rem',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px',
+                        }}
+                      >
+                        Total Spent
+                      </Typography>
+                      <Typography
+                        variant="h3"
+                        sx={{
+                          fontWeight: 700,
+                          color: 'text.primary',
+                          lineHeight: 1.2,
+                          mb: 0.5,
+                        }}
+                      >
+                        ${totalSpent.toLocaleString()}
+                      </Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        bgcolor: 'warning.main',
+                        borderRadius: 2.5,
+                        p: 1.5,
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: 56,
+                        height: 56,
+                        boxShadow: '0 4px 12px rgba(237, 108, 2, 0.3)',
+                      }}
+                    >
+                      <AttachMoney sx={{ fontSize: 28 }} />
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
         </LazySection>
+
+        {/* Section Toggle */}
+        <Box sx={{ mb: 2, display: 'flex', gap: 2 }}>
+          <Button
+            variant={activeSection === 'dashboard' ? 'contained' : 'outlined'}
+            onClick={() => {
+              setActiveSection('dashboard');
+              setActiveTab('dashboard-overview');
+            }}
+          >
+            Dashboard
+          </Button>
+          <Button
+            variant={activeSection === 'profile' ? 'contained' : 'outlined'}
+            onClick={() => {
+              setActiveSection('profile');
+              setActiveTab('profile-overview');
+            }}
+          >
+            Profile
+          </Button>
+        </Box>
 
         {/* Tabs */}
         <Card>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs
               value={activeTab}
-              onChange={(e, newValue) => setActiveTab(newValue)}
+              onChange={(e, newValue) => setActiveTab(newValue as TabType)}
               variant="scrollable"
               scrollButtons="auto"
             >
-              <Tab label="Overview" value="overview" />
-              <Tab label={`Completed Jobs (${completedJobs.length})`} value="completed" />
-              <Tab label={`Reviews Given (${client.reviewsGiven?.length || 0})`} value="reviews" />
+              {activeSection === 'dashboard' ? (
+                <>
+                  <Tab label="Overview" value="dashboard-overview" />
+                  <Tab label={`Jobs (${activeJobs.length})`} value="dashboard-jobs" />
+                  <Tab label={`Proposals (${allProposals.length})`} value="dashboard-proposals" />
+                  <Tab label={`Freelancers (${hiredFreelancers.length})`} value="dashboard-freelancers" />
+                  <Tab label="Messages" value="dashboard-messages" />
+                </>
+              ) : (
+                <>
+                  <Tab label="Overview" value="profile-overview" />
+                  <Tab label={`Completed Jobs (${completedJobs.length})`} value="profile-completed" />
+                  <Tab label={`Reviews Given (${client.reviewsGiven?.length || 0})`} value="profile-reviews" />
+                  <Tab label="Settings" value="profile-settings" />
+                </>
+              )}
             </Tabs>
           </Box>
 
           <CardContent>
-            {/* Overview Tab */}
-            <TabPanel value={activeTab === 'overview' ? 0 : -1} index={0}>
+            {/* Dashboard Tabs */}
+            {activeSection === 'dashboard' && (
+              <>
+                <TabPanel value={activeTab === 'dashboard-overview' ? 0 : -1} index={0}>
+                  <DashboardOverviewTab
+                    activeJobs={activeJobs}
+                    allProposals={allProposals}
+                    hiredFreelancers={hiredFreelancers}
+                    router={router}
+                  />
+                </TabPanel>
+                <TabPanel value={activeTab === 'dashboard-jobs' ? 1 : -1} index={1}>
+                  <DashboardJobsTab jobs={activeJobs} router={router} />
+                </TabPanel>
+                <TabPanel value={activeTab === 'dashboard-proposals' ? 2 : -1} index={2}>
+                  <DashboardProposalsTab proposals={allProposals} router={router} />
+                </TabPanel>
+                <TabPanel value={activeTab === 'dashboard-freelancers' ? 3 : -1} index={3}>
+                  <DashboardFreelancersTab freelancers={hiredFreelancers} router={router} />
+                </TabPanel>
+                <TabPanel value={activeTab === 'dashboard-messages' ? 4 : -1} index={4}>
+                  <DashboardMessagesTab />
+                </TabPanel>
+              </>
+            )}
+
+            {/* Profile Tabs */}
+            {activeSection === 'profile' && (
+              <>
+                <TabPanel value={activeTab === 'profile-overview' ? 0 : -1} index={0}>
               <Grid container spacing={3}>
                 {/* Profile Information */}
                 <Grid size={{ xs: 12 }}>
@@ -402,7 +659,7 @@ export default function ClientProfilePage() {
                       Recent Completed Jobs
                     </Typography>
                     {completedJobs.length > 0 && (
-                      <Button size="small" onClick={() => setActiveTab('completed')}>
+                      <Button size="small" onClick={() => setActiveTab('profile-completed')}>
                         View All
                       </Button>
                     )}
@@ -418,7 +675,10 @@ export default function ClientProfilePage() {
                       </Typography>
                       <Button
                         variant="contained"
-                        onClick={() => router.push('/client')}
+                        onClick={() => {
+                          setActiveSection('dashboard');
+                          setActiveTab('dashboard-overview');
+                        }}
                         startIcon={<Work />}
                       >
                         Go to Dashboard
@@ -478,7 +738,7 @@ export default function ClientProfilePage() {
                       Recent Reviews Given
                     </Typography>
                     {client.reviewsGiven && client.reviewsGiven.length > 0 && (
-                      <Button size="small" onClick={() => setActiveTab('reviews')}>
+                      <Button size="small" onClick={() => setActiveTab('profile-reviews')}>
                         View All
                       </Button>
                     )}
@@ -530,8 +790,7 @@ export default function ClientProfilePage() {
               </Grid>
             </TabPanel>
 
-            {/* Completed Jobs Tab */}
-            <TabPanel value={activeTab === 'completed' ? 1 : -1} index={1}>
+                <TabPanel value={activeTab === 'profile-completed' ? 1 : -1} index={1}>
               {completedJobs.length === 0 ? (
                 <Paper sx={{ p: 4, textAlign: 'center' }}>
                   <CheckCircle sx={{ fontSize: 64, color: 'text.secondary', mb: 2, opacity: 0.5 }} />
@@ -590,8 +849,7 @@ export default function ClientProfilePage() {
             </TabPanel>
 
 
-            {/* Reviews Tab */}
-            <TabPanel value={activeTab === 'reviews' ? 2 : -1} index={2}>
+                <TabPanel value={activeTab === 'profile-reviews' ? 2 : -1} index={2}>
               {!client.reviewsGiven || client.reviewsGiven.length === 0 ? (
                 <Paper sx={{ p: 4, textAlign: 'center' }}>
                   <Star sx={{ fontSize: 64, color: 'text.secondary', mb: 2, opacity: 0.5 }} />
@@ -635,10 +893,383 @@ export default function ClientProfilePage() {
                   ))}
                 </Box>
               )}
-            </TabPanel>
+                </TabPanel>
+                <TabPanel value={activeTab === 'profile-settings' ? 3 : -1} index={3}>
+                  <Box sx={{ textAlign: 'center', py: 4 }}>
+                    <Button variant="contained" onClick={() => router.push('/profile/settings')}>
+                      Go to Profile Settings
+                    </Button>
+                  </Box>
+                </TabPanel>
+              </>
+            )}
           </CardContent>
         </Card>
       </Container>
+    </Box>
+  );
+}
+
+// Dashboard Tab Components
+function DashboardOverviewTab({ activeJobs, allProposals, hiredFreelancers, router }: any) {
+  return (
+    <Box>
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6" fontWeight="bold">
+              Active Jobs
+            </Typography>
+            <Button size="small" onClick={() => router.push('/profile/client?section=dashboard&tab=dashboard-jobs')}>
+              View All
+            </Button>
+          </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {activeJobs.slice(0, 3).map((job: any) => (
+              <Paper key={job.id} sx={{ p: 2, borderRadius: 2, '&:hover': { boxShadow: 4 } }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="subtitle1" fontWeight="600" gutterBottom>
+                      {job.title}
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
+                      <Chip
+                        label={job.status}
+                        size="small"
+                        color={job.status === 'OPEN' ? 'success' : 'primary'}
+                      />
+                      <Typography variant="caption" color="text.secondary">
+                        {job.proposals?.length || 0} proposals
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Typography variant="h6" fontWeight="bold" color="primary.main">
+                    ${job.budget?.toLocaleString() || 0}
+                  </Typography>
+                </Box>
+              </Paper>
+            ))}
+            {activeJobs.length === 0 && (
+              <Paper sx={{ p: 4, textAlign: 'center' }}>
+                <Work sx={{ fontSize: 64, color: 'text.secondary', mb: 2, opacity: 0.5 }} />
+                <Typography variant="h6" color="text.secondary" gutterBottom>
+                  No Active Jobs
+                </Typography>
+                <Button variant="contained" startIcon={<Add />} onClick={() => router.push('/post-job')} sx={{ mt: 2 }}>
+                  Post a Job
+                </Button>
+              </Paper>
+            )}
+          </Box>
+        </Grid>
+
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6" fontWeight="bold">
+              Recent Proposals
+            </Typography>
+            <Button size="small" onClick={() => router.push('/profile/client?section=dashboard&tab=dashboard-proposals')}>
+              View All
+            </Button>
+          </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {allProposals.slice(0, 3).map((proposal: any) => (
+              <Paper key={proposal.id} sx={{ p: 2, borderRadius: 2, '&:hover': { boxShadow: 4 } }}>
+                <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
+                  <Avatar>{proposal.developer?.displayName?.charAt(0) || 'F'}</Avatar>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="subtitle2" fontWeight="600">
+                      {proposal.developer?.displayName || proposal.developer?.username || 'Freelancer'}
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      {proposal.developer?.averageRating && (
+                        <>
+                          <Star sx={{ fontSize: 14, color: 'warning.main' }} />
+                          <Typography variant="caption">{proposal.developer.averageRating.toFixed(1)}</Typography>
+                        </>
+                      )}
+                    </Box>
+                  </Box>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="h6" fontWeight="bold" color="primary.main">
+                    ${proposal.proposedBudget?.toLocaleString() || 0}
+                  </Typography>
+                  <Chip label={proposal.status} size="small" color="info" />
+                </Box>
+              </Paper>
+            ))}
+            {allProposals.length === 0 && (
+              <Paper sx={{ p: 4, textAlign: 'center' }}>
+                <Assignment sx={{ fontSize: 64, color: 'text.secondary', mb: 2, opacity: 0.5 }} />
+                <Typography variant="h6" color="text.secondary" gutterBottom>
+                  No Proposals Yet
+                </Typography>
+              </Paper>
+            )}
+          </Box>
+        </Grid>
+
+        <Grid size={{ xs: 12 }}>
+          <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6" fontWeight="bold">
+              Active Contracts
+            </Typography>
+            <Button size="small" onClick={() => router.push('/profile/client?section=dashboard&tab=dashboard-freelancers')}>
+              View All
+            </Button>
+          </Box>
+          <Grid container spacing={2}>
+            {hiredFreelancers.slice(0, 4).map((freelancer: any, idx: number) => (
+              <Grid size={{ xs: 12, md: 6 }} key={freelancer.id || idx}>
+                <Paper sx={{ p: 3, borderRadius: 2, '&:hover': { boxShadow: 4 } }}>
+                  <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                    <Avatar sx={{ width: 56, height: 56 }}>{freelancer.displayName?.charAt(0) || 'F'}</Avatar>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="subtitle1" fontWeight="600">
+                        {freelancer.displayName || freelancer.username || 'Freelancer'}
+                      </Typography>
+                      {freelancer.averageRating && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <Star sx={{ fontSize: 14, color: 'warning.main' }} />
+                          <Typography variant="body2">{freelancer.averageRating.toFixed(1)}</Typography>
+                        </Box>
+                      )}
+                    </Box>
+                  </Box>
+                </Paper>
+              </Grid>
+            ))}
+            {hiredFreelancers.length === 0 && (
+              <Grid size={{ xs: 12 }}>
+                <Paper sx={{ p: 4, textAlign: 'center' }}>
+                  <People sx={{ fontSize: 64, color: 'text.secondary', mb: 2, opacity: 0.5 }} />
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    No Hired Freelancers Yet
+                  </Typography>
+                </Paper>
+              </Grid>
+            )}
+          </Grid>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+}
+
+function DashboardJobsTab({ jobs, router }: any) {
+  return (
+    <Box>
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h6" fontWeight="bold">
+          Your Jobs
+        </Typography>
+        <Button variant="contained" startIcon={<Add />} onClick={() => router.push('/post-job')}>
+          Post a Job
+        </Button>
+      </Box>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {jobs.map((job: any) => (
+          <Paper key={job.id} sx={{ p: 3, borderRadius: 2, '&:hover': { boxShadow: 4 } }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="h6" fontWeight="600" gutterBottom>
+                  {job.title}
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
+                  <Chip
+                    label={job.status}
+                    size="small"
+                    color={job.status === 'OPEN' ? 'success' : 'primary'}
+                  />
+                  <Typography variant="body2" color="text.secondary">
+                    {job.proposals?.length || 0} proposals
+                  </Typography>
+                </Box>
+              </Box>
+              <Box sx={{ textAlign: 'right', ml: 2 }}>
+                <Typography variant="h5" fontWeight="bold" color="primary.main">
+                  ${job.budget?.toLocaleString() || 0}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {job.currency || 'USDC'}
+                </Typography>
+              </Box>
+            </Box>
+            <Divider sx={{ my: 2 }} />
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+              <Button variant="outlined" size="small" onClick={() => router.push(`/jobs/${job.id}`)}>
+                View Details
+              </Button>
+              <Button variant="outlined" size="small" startIcon={<Message />}>
+                View Proposals ({job.proposals?.length || 0})
+              </Button>
+            </Box>
+          </Paper>
+        ))}
+        {jobs.length === 0 && (
+          <Paper sx={{ p: 6, textAlign: 'center' }}>
+            <Work sx={{ fontSize: 80, color: 'text.secondary', mb: 3, opacity: 0.5 }} />
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
+              No Jobs Posted Yet
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+              Start posting jobs to find talented freelancers.
+            </Typography>
+            <Button variant="contained" startIcon={<Add />} onClick={() => router.push('/post-job')}>
+              Post Your First Job
+            </Button>
+          </Paper>
+        )}
+      </Box>
+    </Box>
+  );
+}
+
+function DashboardProposalsTab({ proposals, router }: any) {
+  return (
+    <Box>
+      <Typography variant="h6" fontWeight="bold" gutterBottom>
+        Proposals Received
+      </Typography>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {proposals.map((proposal: any) => (
+          <Paper key={proposal.id} sx={{ p: 3, borderRadius: 2, '&:hover': { boxShadow: 4 } }}>
+            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+              <Avatar sx={{ width: 56, height: 56 }}>{proposal.developer?.displayName?.charAt(0) || 'F'}</Avatar>
+              <Box sx={{ flex: 1 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
+                  <Box>
+                    <Typography variant="subtitle1" fontWeight="600">
+                      {proposal.developer?.displayName || proposal.developer?.username || 'Freelancer'}
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                      {proposal.developer?.averageRating && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <Star sx={{ fontSize: 16, color: 'warning.main' }} />
+                          <Typography variant="body2" fontWeight="600">
+                            {proposal.developer.averageRating.toFixed(1)}
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
+                  </Box>
+                  <Chip label={proposal.status} size="small" color="info" />
+                </Box>
+              </Box>
+            </Box>
+            <Divider sx={{ my: 2 }} />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Box>
+                <Typography variant="h6" fontWeight="bold" color="primary.main">
+                  ${proposal.proposedBudget?.toLocaleString() || 0}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button variant="outlined" size="small">
+                  View Profile
+                </Button>
+                <Button variant="outlined" size="small" startIcon={<Message />}>
+                  Message
+                </Button>
+                <Button variant="contained" size="small" startIcon={<PersonAdd />}>
+                  Hire
+                </Button>
+              </Box>
+            </Box>
+          </Paper>
+        ))}
+        {proposals.length === 0 && (
+          <Paper sx={{ p: 6, textAlign: 'center' }}>
+            <Assignment sx={{ fontSize: 80, color: 'text.secondary', mb: 3, opacity: 0.5 }} />
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
+              No Proposals Yet
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+              Proposals from freelancers will appear here once you post jobs.
+            </Typography>
+            <Button variant="contained" startIcon={<Add />} onClick={() => router.push('/post-job')}>
+              Post a Job
+            </Button>
+          </Paper>
+        )}
+      </Box>
+    </Box>
+  );
+}
+
+function DashboardFreelancersTab({ freelancers, router }: any) {
+  return (
+    <Box>
+      <Typography variant="h6" fontWeight="bold" gutterBottom>
+        Hired Freelancers
+      </Typography>
+      <Grid container spacing={3}>
+        {freelancers.map((freelancer: any, idx: number) => (
+          <Grid size={{ xs: 12, md: 6 }} key={freelancer.id || idx}>
+            <Paper sx={{ p: 3, borderRadius: 2, height: '100%', '&:hover': { boxShadow: 4 } }}>
+              <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                <Avatar sx={{ width: 64, height: 64 }}>{freelancer.displayName?.charAt(0) || 'F'}</Avatar>
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="h6" fontWeight="600">
+                    {freelancer.displayName || freelancer.username || 'Freelancer'}
+                  </Typography>
+                  {freelancer.averageRating && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
+                      <Star sx={{ fontSize: 16, color: 'warning.main' }} />
+                      <Typography variant="body2" fontWeight="600">
+                        {freelancer.averageRating.toFixed(1)}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+                <IconButton size="small">
+                  <MoreVert />
+                </IconButton>
+              </Box>
+              <Divider sx={{ my: 2 }} />
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button variant="outlined" size="small" fullWidth startIcon={<Message />}>
+                  Message
+                </Button>
+                <Button variant="outlined" size="small" fullWidth>
+                  View Details
+                </Button>
+              </Box>
+            </Paper>
+          </Grid>
+        ))}
+        {freelancers.length === 0 && (
+          <Grid size={{ xs: 12 }}>
+            <Paper sx={{ p: 6, textAlign: 'center' }}>
+              <People sx={{ fontSize: 80, color: 'text.secondary', mb: 3, opacity: 0.5 }} />
+              <Typography variant="h5" fontWeight="bold" gutterBottom>
+                No Hired Freelancers Yet
+              </Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+                Hire freelancers by accepting their proposals on your jobs.
+              </Typography>
+              <Button variant="contained" startIcon={<Add />} onClick={() => router.push('/post-job')}>
+                Post a Job
+              </Button>
+            </Paper>
+          </Grid>
+        )}
+      </Grid>
+    </Box>
+  );
+}
+
+function DashboardMessagesTab() {
+  return (
+    <Box sx={{ textAlign: 'center', py: 8 }}>
+      <Message sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+      <Typography variant="h6" fontWeight="bold" gutterBottom>
+        No Messages Yet
+      </Typography>
+      <Typography variant="body2" color="text.secondary">
+        Start a conversation with your freelancers or respond to proposals.
+      </Typography>
     </Box>
   );
 }

@@ -194,7 +194,7 @@ export default function DeveloperPage() {
 
   const availableJobs = data?.jobs?.jobs || [];
 
-  // Calculate stats from real data
+  // Calculate stats
   const activeContracts = developer.jobsAsDeveloper?.filter((job: any) =>
     ['IN_PROGRESS', 'UNDER_REVIEW'].includes(job.status)
   ) || [];
@@ -667,36 +667,36 @@ const OverviewTab = ({ availableJobs, myProposals, activeContracts, router, getJ
           ) : (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {availableJobs.slice(0, 3).map((job: any) => (
-              <Paper key={job.id} sx={{ p: 2, borderRadius: 2, '&:hover': { boxShadow: 4 } }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="subtitle1" fontWeight="600" gutterBottom>
-                      {job.title}
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
-                      <Typography variant="caption" color="text.secondary">
-                        {job.proposalCount || 0} proposals
+                <Paper key={job.id} sx={{ p: 2, borderRadius: 2, '&:hover': { boxShadow: 4 } }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="subtitle1" fontWeight="600" gutterBottom>
+                        {job.title}
                       </Typography>
-                      {job.createdAt && (
+                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
                         <Typography variant="caption" color="text.secondary">
-                          {new Date(job.createdAt).toLocaleDateString()}
+                          {job.proposalCount || 0} proposals
                         </Typography>
-                      )}
+                        {job.createdAt && (
+                          <Typography variant="caption" color="text.secondary">
+                            {new Date(job.createdAt).toLocaleDateString()}
+                          </Typography>
+                        )}
+                      </Box>
                     </Box>
+                    <Typography variant="h6" fontWeight="bold" color="primary.main">
+                      ${job.budget.toLocaleString()}
+                    </Typography>
                   </Box>
-                  <Typography variant="h6" fontWeight="bold" color="primary.main">
-                    ${job.budget.toLocaleString()}
-                  </Typography>
-                </Box>
-                {job.requiredSkills && job.requiredSkills.length > 0 && (
-                  <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                    {job.requiredSkills.slice(0, 3).map((jobSkill: any) => (
-                      <Chip key={jobSkill.skill.name} label={jobSkill.skill.name} size="small" variant="outlined" />
-                    ))}
-                  </Box>
-                )}
-              </Paper>
-            ))}
+                  {job.requiredSkills && job.requiredSkills.length > 0 && (
+                    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                      {job.requiredSkills.slice(0, 3).map((jobSkill: any) => (
+                        <Chip key={jobSkill.skill.name} label={jobSkill.skill.name} size="small" variant="outlined" />
+                      ))}
+                    </Box>
+                  )}
+                </Paper>
+              ))}
             </Box>
           )}
         </Grid>
@@ -736,6 +736,20 @@ const OverviewTab = ({ availableJobs, myProposals, activeContracts, router, getJ
                 </Box>
               </Paper>
             ))}
+            {myProposals.length === 0 && (
+              <Paper sx={{ p: 4, textAlign: 'center' }}>
+                <Send sx={{ fontSize: 64, color: 'text.secondary', mb: 2, opacity: 0.5 }} />
+                <Typography variant="h6" color="text.secondary" gutterBottom>
+                  No Proposals Yet
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                  Start applying to jobs to see your proposals here
+                </Typography>
+                <Button variant="contained" onClick={() => router.push('/jobs')} startIcon={<Search />}>
+                  Browse Jobs
+                </Button>
+              </Paper>
+            )}
           </Box>
         </Grid>
 
@@ -767,49 +781,45 @@ const OverviewTab = ({ availableJobs, myProposals, activeContracts, router, getJ
           ) : (
             <Grid container spacing={2}>
               {activeContracts.map((contract: any) => (
-              <Grid size={{ xs: 12, md: 6 }} key={contract.id}>
-                <Paper sx={{ p: 3, borderRadius: 2, '&:hover': { boxShadow: 4 } }}>
-                  <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                    <Avatar sx={{ width: 56, height: 56 }}>{contract.client.name.charAt(0)}</Avatar>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="subtitle1" fontWeight="600">
-                        {contract.client.name}
-                      </Typography>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <Star sx={{ fontSize: 14, color: 'warning.main' }} />
-                        <Typography variant="body2">{contract.client.rating}</Typography>
-                      </Box>
-                      <Typography variant="body2" color="text.secondary">
-                        {contract.title}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  {(contract.status === 'IN_PROGRESS' || contract.status === 'UNDER_REVIEW') && contract.milestones && contract.milestones.length > 0 && (
-                    <Box sx={{ mb: 2 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                        <Typography variant="caption" color="text.secondary">
-                          Progress
+                <Grid size={{ xs: 12, md: 6 }} key={contract.id}>
+                  <Paper sx={{ p: 3, borderRadius: 2, '&:hover': { boxShadow: 4 } }}>
+                    <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                      <Avatar sx={{ width: 56, height: 56 }}>{contract.client.name.charAt(0)}</Avatar>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="subtitle1" fontWeight="600">
+                          {contract.client.name}
                         </Typography>
-                        <Typography variant="caption" fontWeight="600">
-                          {contract.progress}%
+                        <Typography variant="body2" color="text.secondary">
+                          {contract.title}
                         </Typography>
                       </Box>
-                      <LinearProgress variant="determinate" value={contract.progress} sx={{ height: 8, borderRadius: 1 }} />
                     </Box>
-                  )}
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="h6" fontWeight="bold" color="primary.main">
-                      ${contract.budget.toLocaleString()}
-                    </Typography>
-                    <Chip
-                      label={contract.status}
-                      size="small"
-                      color={contract.status === 'UNDER_REVIEW' ? 'warning' : 'primary'}
-                      icon={contract.status === 'UNDER_REVIEW' ? <Schedule /> : <CheckCircle />}
-                    />
-                  </Box>
-                </Paper>
-              </Grid>
+                    {(contract.status === 'IN_PROGRESS' || contract.status === 'UNDER_REVIEW') && contract.milestones && contract.milestones.length > 0 && (
+                      <Box sx={{ mb: 2 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            Progress
+                          </Typography>
+                          <Typography variant="caption" fontWeight="600">
+                            {contract.progress}%
+                          </Typography>
+                        </Box>
+                        <LinearProgress variant="determinate" value={contract.progress} sx={{ height: 8, borderRadius: 1 }} />
+                      </Box>
+                    )}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography variant="h6" fontWeight="bold" color="primary.main">
+                        ${contract.budget.toLocaleString()}
+                      </Typography>
+                      <Chip
+                        label={contract.status}
+                        size="small"
+                        color={contract.status === 'UNDER_REVIEW' ? 'warning' : 'primary'}
+                        icon={contract.status === 'UNDER_REVIEW' ? <Schedule /> : <CheckCircle />}
+                      />
+                    </Box>
+                  </Paper>
+                </Grid>
               ))}
             </Grid>
           )}
@@ -847,64 +857,64 @@ const JobsTab = ({ jobs, router }: any) => {
       ) : (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {jobs.map((job: any) => (
-          <Paper key={job.id} sx={{ p: 3, borderRadius: 2, '&:hover': { boxShadow: 4 } }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
-              <Box sx={{ flex: 1 }}>
-                <Typography variant="h6" fontWeight="600" gutterBottom>
-                  {job.title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  {job.description}
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
-                  <Chip label={job.category} size="small" />
-                  <Typography variant="body2" color="text.secondary">
-                    {job.proposalCount || 0} proposals
+            <Paper key={job.id} sx={{ p: 3, borderRadius: 2, '&:hover': { boxShadow: 4 } }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="h6" fontWeight="600" gutterBottom>
+                    {job.title}
                   </Typography>
-                  {job.createdAt && (
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    {job.description}
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
+                    <Chip label={job.category} size="small" />
                     <Typography variant="body2" color="text.secondary">
-                      Posted {new Date(job.createdAt).toLocaleDateString()}
+                      {job.proposalCount || 0} proposals
                     </Typography>
+                    {job.createdAt && (
+                      <Typography variant="body2" color="text.secondary">
+                        Posted {new Date(job.createdAt).toLocaleDateString()}
+                      </Typography>
+                    )}
+                  </Box>
+                  {job.requiredSkills && job.requiredSkills.length > 0 && (
+                    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                      {job.requiredSkills.map((jobSkill: any) => (
+                        <Chip key={jobSkill.skill.name} label={jobSkill.skill.name} size="small" variant="outlined" />
+                      ))}
+                    </Box>
                   )}
                 </Box>
-                {job.requiredSkills && job.requiredSkills.length > 0 && (
-                  <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                    {job.requiredSkills.map((jobSkill: any) => (
-                      <Chip key={jobSkill.skill.name} label={jobSkill.skill.name} size="small" variant="outlined" />
-                    ))}
-                  </Box>
-                )}
+                <Box sx={{ textAlign: 'right', ml: 2 }}>
+                  <Typography variant="h5" fontWeight="bold" color="primary.main">
+                    ${job.budget.toLocaleString()}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {job.currency}
+                  </Typography>
+                </Box>
               </Box>
-              <Box sx={{ textAlign: 'right', ml: 2 }}>
-                <Typography variant="h5" fontWeight="bold" color="primary.main">
-                  ${job.budget.toLocaleString()}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {job.currency}
-                </Typography>
+              <Divider sx={{ my: 2 }} />
+              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<Visibility />}
+                  onClick={() => router.push(`/jobs/${job.id}`)}
+                >
+                  View Details
+                </Button>
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<Send />}
+                  onClick={() => router.push(`/jobs/${job.id}`)}
+                >
+                  Submit Proposal
+                </Button>
               </Box>
-            </Box>
-            <Divider sx={{ my: 2 }} />
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-              <Button 
-                variant="outlined" 
-                size="small" 
-                startIcon={<Visibility />}
-                onClick={() => router.push(`/jobs/${job.id}`)}
-              >
-                View Details
-              </Button>
-              <Button 
-                variant="contained" 
-                size="small" 
-                startIcon={<Send />}
-                onClick={() => router.push(`/jobs/${job.id}`)}
-              >
-                Submit Proposal
-              </Button>
-            </Box>
-          </Paper>
-        ))}
+            </Paper>
+          ))}
         </Box>
       )}
     </Box>
@@ -934,53 +944,53 @@ const ProposalsTab = ({ proposals, router }: any) => {
       ) : (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {proposals.map((proposal: any) => (
-          <Paper key={proposal.id} sx={{ p: 3, borderRadius: 2, '&:hover': { boxShadow: 4 } }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
-              <Box sx={{ flex: 1 }}>
-                <Typography variant="subtitle1" fontWeight="600" gutterBottom>
-                  {proposal.jobTitle}
-                </Typography>
-                {proposal.submittedAt && (
-                  <Typography variant="body2" color="text.secondary">
-                    Submitted {new Date(proposal.submittedAt).toLocaleDateString()}
+            <Paper key={proposal.id} sx={{ p: 3, borderRadius: 2, '&:hover': { boxShadow: 4 } }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="subtitle1" fontWeight="600" gutterBottom>
+                    {proposal.jobTitle}
                   </Typography>
-                )}
-              </Box>
-              <Chip
-                label={proposal.status}
-                size="small"
-                color={proposal.status === 'ACCEPTED' ? 'success' : 'info'}
-              />
-            </Box>
-            <Divider sx={{ my: 2 }} />
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Box>
-                <Typography variant="h6" fontWeight="bold" color="primary.main">
-                  ${proposal.bid.toLocaleString()}
-                </Typography>
-                {proposal.proposedDuration && (
-                  <Typography variant="caption" color="text.secondary">
-                    Estimated {proposal.proposedDuration} days
-                  </Typography>
-                )}
-              </Box>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button 
-                  variant="outlined" 
+                  {proposal.submittedAt && (
+                    <Typography variant="body2" color="text.secondary">
+                      Submitted {new Date(proposal.submittedAt).toLocaleDateString()}
+                    </Typography>
+                  )}
+                </Box>
+                <Chip
+                  label={proposal.status}
                   size="small"
-                  onClick={() => router.push(`/jobs/${proposal.jobId}`)}
-                >
-                  View Job
-                </Button>
-                {proposal.status === 'PENDING' && (
-                  <Button variant="outlined" size="small" color="error">
-                    Withdraw
-                  </Button>
-                )}
+                  color={proposal.status === 'ACCEPTED' ? 'success' : 'info'}
+                />
               </Box>
-            </Box>
-          </Paper>
-        ))}
+              <Divider sx={{ my: 2 }} />
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box>
+                  <Typography variant="h6" fontWeight="bold" color="primary.main">
+                    ${proposal.bid.toLocaleString()}
+                  </Typography>
+                  {proposal.proposedDuration && (
+                    <Typography variant="caption" color="text.secondary">
+                      Estimated {proposal.proposedDuration} days
+                    </Typography>
+                  )}
+                </Box>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => router.push(`/jobs/${proposal.jobId}`)}
+                  >
+                    View Job
+                  </Button>
+                  {proposal.status === 'PENDING' && (
+                    <Button variant="outlined" size="small" color="error">
+                      Withdraw
+                    </Button>
+                  )}
+                </Box>
+              </Box>
+            </Paper>
+          ))}
         </Box>
       )}
     </Box>
@@ -1010,94 +1020,88 @@ const ContractsTab = ({ contracts, router, getJobProgress }: any) => {
       ) : (
         <Grid container spacing={3}>
           {contracts.map((contract: any) => (
-          <Grid size={{ xs: 12, md: 6 }} key={contract.id}>
-            <Paper sx={{ p: 3, borderRadius: 2, height: '100%', '&:hover': { boxShadow: 4 } }}>
-              <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                <Avatar sx={{ width: 64, height: 64 }}>{contract.client.name.charAt(0)}</Avatar>
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="h6" fontWeight="600">
-                    {contract.client.name}
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
-                    <Star sx={{ fontSize: 16, color: 'warning.main' }} />
-                    <Typography variant="body2" fontWeight="600">
-                      {contract.client.rating}
+            <Grid size={{ xs: 12, md: 6 }} key={contract.id}>
+              <Paper sx={{ p: 3, borderRadius: 2, height: '100%', '&:hover': { boxShadow: 4 } }}>
+                <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                  <Avatar sx={{ width: 64, height: 64 }}>{contract.client.name.charAt(0)}</Avatar>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="h6" fontWeight="600">
+                      {contract.client.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {contract.title}
                     </Typography>
                   </Box>
-                  <Typography variant="body2" color="text.secondary">
-                    {contract.title}
-                  </Typography>
+                  <IconButton size="small">
+                    <MoreVert />
+                  </IconButton>
                 </Box>
-                <IconButton size="small">
-                  <MoreVert />
-                </IconButton>
-              </Box>
-              {(contract.status === 'IN_PROGRESS' || contract.status === 'UNDER_REVIEW') && contract.milestones && contract.milestones.length > 0 && (
-                <Box sx={{ mb: 2 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                    <Typography variant="caption" color="text.secondary">
-                      Progress
-                    </Typography>
-                    <Typography variant="caption" fontWeight="600">
-                      {contract.progress}%
-                    </Typography>
-                  </Box>
-                  <LinearProgress variant="determinate" value={contract.progress} sx={{ height: 8, borderRadius: 1 }} />
-                  {contract.milestones && contract.milestones.length > 0 && (
-                    <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                      {contract.milestones.slice(0, 3).map((milestone: any) => (
-                        <Box key={milestone.id} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <CheckCircle
-                            fontSize="small"
-                            color={milestone.status === 'completed' ? 'success' : 'disabled'}
-                          />
-                          <Typography variant="caption" sx={{ flex: 1 }}>
-                            {milestone.title}
-                          </Typography>
-                        </Box>
-                      ))}
+                {(contract.status === 'IN_PROGRESS' || contract.status === 'UNDER_REVIEW') && contract.milestones && contract.milestones.length > 0 && (
+                  <Box sx={{ mb: 2 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                      <Typography variant="caption" color="text.secondary">
+                        Progress
+                      </Typography>
+                      <Typography variant="caption" fontWeight="600">
+                        {contract.progress}%
+                      </Typography>
                     </Box>
-                  )}
+                    <LinearProgress variant="determinate" value={contract.progress} sx={{ height: 8, borderRadius: 1 }} />
+                    {contract.milestones && contract.milestones.length > 0 && (
+                      <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        {contract.milestones.slice(0, 3).map((milestone: any) => (
+                          <Box key={milestone.id} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <CheckCircle
+                              fontSize="small"
+                              color={milestone.status === 'completed' ? 'success' : 'disabled'}
+                            />
+                            <Typography variant="caption" sx={{ flex: 1 }}>
+                              {milestone.title}
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
+                  </Box>
+                )}
+                <Divider sx={{ my: 2 }} />
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Box>
+                    <Typography variant="h6" fontWeight="bold" color="primary.main">
+                      ${contract.budget.toLocaleString()}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {contract.currency}
+                    </Typography>
+                  </Box>
+                  <Chip
+                    label={contract.status}
+                    size="small"
+                    color={contract.status === 'UNDER_REVIEW' ? 'warning' : 'primary'}
+                    icon={contract.status === 'UNDER_REVIEW' ? <Schedule /> : <CheckCircle />}
+                  />
                 </Box>
-              )}
-              <Divider sx={{ my: 2 }} />
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Box>
-                  <Typography variant="h6" fontWeight="bold" color="primary.main">
-                    ${contract.budget.toLocaleString()}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {contract.currency}
-                  </Typography>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    fullWidth
+                    startIcon={<Message />}
+                    onClick={() => router.push(`/messages?jobId=${contract.id}`)}
+                  >
+                    Message
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    fullWidth
+                    onClick={() => router.push(`/jobs/${contract.id}`)}
+                  >
+                    View Details
+                  </Button>
                 </Box>
-                <Chip
-                  label={contract.status}
-                  size="small"
-                  color={contract.status === 'UNDER_REVIEW' ? 'warning' : 'primary'}
-                  icon={contract.status === 'UNDER_REVIEW' ? <Schedule /> : <CheckCircle />}
-                />
-              </Box>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button 
-                  variant="outlined" 
-                  size="small" 
-                  fullWidth 
-                  startIcon={<Message />}
-                  onClick={() => router.push(`/messages?jobId=${contract.id}`)}
-                >
-                  Message
-                </Button>
-                <Button 
-                  variant="outlined" 
-                  size="small" 
-                  fullWidth
-                  onClick={() => router.push(`/jobs/${contract.id}`)}
-                >
-                  View Details
-                </Button>
-              </Box>
-            </Paper>
-          </Grid>
+              </Paper>
+            </Grid>
           ))}
         </Grid>
       )}
@@ -1119,4 +1123,3 @@ const MessagesTab = () => {
     </Box>
   );
 };
-

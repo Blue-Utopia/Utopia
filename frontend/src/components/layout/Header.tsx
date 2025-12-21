@@ -100,15 +100,6 @@ export function Header() {
       ),
     },
     {
-      key: 'my-profile',
-      label: (
-        <Link href={getProfilePath()} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <UserOutlined />
-          <span>My Profile</span>
-        </Link>
-      ),
-    },
-    {
       key: 'premium',
       label: (
         <Link href="/premium" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -174,7 +165,7 @@ export function Header() {
         backgroundColor: isHomePage ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.95)',
       }}
     >
-      {/* Logo */}
+          {/* Logo */}
       <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12 }}>
         <div
           style={{
@@ -201,8 +192,8 @@ export function Header() {
             e.currentTarget.style.boxShadow = '0 2px 4px rgba(20, 168, 0, 0.15)';
           }}
         >
-          DFM
-        </div>
+              DFM
+            </div>
         <Text
           strong
           className="header-title"
@@ -215,9 +206,9 @@ export function Header() {
         >
           WorkFlow
         </Text>
-      </Link>
+          </Link>
 
-      {/* Navigation */}
+          {/* Navigation */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
         <Menu
           mode="horizontal"
@@ -317,7 +308,7 @@ export function Header() {
               >
                 {!user?.avatar && getUserDisplayName().charAt(0).toUpperCase()}
               </Avatar>
-            </div>
+          </div>
           </Dropdown>
         ) : (
           <Space size={12}>
@@ -348,7 +339,7 @@ export function Header() {
             </Button>
           </Space>
         )}
-      </div>
+        </div>
     </AntHeader>
   );
 }

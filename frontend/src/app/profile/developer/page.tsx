@@ -75,7 +75,6 @@ const GET_DEVELOPER_PROFILE = gql`
       }
       proposals {
         id
-        jobId
         job {
           id
           title
