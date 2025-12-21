@@ -47,9 +47,11 @@ router.post('/verify', async (req, res) => {
     });
 
     if (!user) {
+      // For wallet auth, default to DEVELOPER role (users can create separate email account for CLIENT)
       user = await prisma.user.create({
         data: {
           walletAddress: walletAddress.toLowerCase(),
+          role: 'DEVELOPER',
           lastActiveAt: new Date(),
         },
       });
@@ -89,7 +91,7 @@ router.post('/verify', async (req, res) => {
 // Signup with email and password
 router.post('/signup', async (req, res) => {
   try {
-    const { email, password, username, displayName } = req.body;
+    const { email, password, username, displayName, role } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required' });
@@ -104,6 +106,14 @@ router.post('/signup', async (req, res) => {
     // Validate password strength
     if (password.length < 8) {
       return res.status(400).json({ error: 'Password must be at least 8 characters long' });
+    }
+
+    // Validate role - must be provided and must be CLIENT or DEVELOPER
+    if (!role) {
+      return res.status(400).json({ error: 'Role is required. Must be CLIENT or DEVELOPER' });
+    }
+    if (!['CLIENT', 'DEVELOPER'].includes(role)) {
+      return res.status(400).json({ error: 'Invalid role. Must be CLIENT or DEVELOPER' });
     }
 
     // Check if user already exists
@@ -128,13 +138,14 @@ router.post('/signup', async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
+    // Create user with role (role is required)
     const user = await prisma.user.create({
       data: {
         email: email.toLowerCase(),
         password: hashedPassword,
         username: username || null,
         displayName: displayName || null,
+        role: role,
         lastActiveAt: new Date(),
       },
     });

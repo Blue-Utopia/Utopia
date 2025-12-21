@@ -46,9 +46,11 @@ export const userResolvers = {
         });
 
         if (!user) {
+          // For wallet auth, default to DEVELOPER role (users can create separate email account for CLIENT)
           user = await context.prisma.user.create({
             data: {
               walletAddress: walletAddress.toLowerCase(),
+              role: 'DEVELOPER',
               lastActiveAt: new Date(),
             },
           });
@@ -82,7 +84,7 @@ export const userResolvers = {
 
     signup: async (
       _: any,
-      { email, password, username, displayName }: any,
+      { email, password, username, displayName, role }: any,
       context: Context
     ) => {
       try {
@@ -95,6 +97,14 @@ export const userResolvers = {
         // Validate password strength
         if (password.length < 8) {
           throw new Error('Password must be at least 8 characters long');
+        }
+
+        // Validate role - must be provided and must be CLIENT or DEVELOPER
+        if (!role) {
+          throw new Error('Role is required. Must be CLIENT or DEVELOPER');
+        }
+        if (!['CLIENT', 'DEVELOPER'].includes(role)) {
+          throw new Error('Invalid role. Must be CLIENT or DEVELOPER');
         }
 
         // Check if user already exists
@@ -119,13 +129,14 @@ export const userResolvers = {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create user
+        // Create user with role (role is required)
         const user = await context.prisma.user.create({
           data: {
             email: email.toLowerCase(),
             password: hashedPassword,
             username: username || null,
             displayName: displayName || null,
+            role: role,
             lastActiveAt: new Date(),
           },
         });

@@ -47,9 +47,9 @@ export function useAuth() {
     }
   };
 
-  const signup = async (email: string, password: string, username?: string, displayName?: string) => {
+  const signup = async (email: string, password: string, username?: string, displayName?: string, role?: 'CLIENT' | 'DEVELOPER') => {
     try {
-      await contextSignup(email, password, username, displayName);
+      await contextSignup(email, password, username, displayName, role);
       toast.success('Account created successfully!');
     } catch (error: any) {
       console.error('Signup error:', error);

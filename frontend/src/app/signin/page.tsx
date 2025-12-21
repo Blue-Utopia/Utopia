@@ -13,22 +13,28 @@ const { Title, Text } = Typography;
 
 export default function SignInPage() {
   const router = useRouter();
-  const { signin, isAuthenticated, isLoading } = useAuth();
+  const { signin, isAuthenticated, isLoading, user } = useAuth();
   const [form] = Form.useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated based on role
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      router.push('/');
+    if (!isLoading && isAuthenticated && user) {
+      if (user.role === 'CLIENT') {
+        router.push('/client');
+      } else if (user.role === 'DEVELOPER') {
+        router.push('/developer');
+      } else {
+        router.push('/');
+      }
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, user, router]);
 
   const handleSubmit = async (values: { email: string; password: string }) => {
     setIsSubmitting(true);
     try {
       await signin(values.email, values.password);
-      router.push('/');
+      // Redirect will be handled by useEffect after user data is loaded
     } catch (error: any) {
       toast.error(error.message || 'Sign in failed');
     } finally {

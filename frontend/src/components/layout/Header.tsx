@@ -17,6 +17,7 @@ import {
   CrownOutlined,
   QuestionCircleOutlined,
   GlobalOutlined,
+  DashboardOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -40,6 +41,20 @@ export function Header() {
     return user?.displayName || user?.username || user?.email?.split('@')[0] || 'User';
   };
 
+  const getProfilePath = () => {
+    if (!user?.role) return '/profile/settings';
+    if (user.role === 'CLIENT') return '/profile/client';
+    if (user.role === 'DEVELOPER') return '/profile/developer';
+    return '/profile/settings'; // Default for BOTH or unknown
+  };
+
+  const getDashboardPath = () => {
+    if (!user?.role) return '/client'; // Default to client dashboard
+    if (user.role === 'CLIENT') return '/client';
+    if (user.role === 'DEVELOPER') return '/developer';
+    return '/client'; // Default fallback
+  };
+
   const handleLogout = () => {
     logout();
     router.push('/');
@@ -50,29 +65,49 @@ export function Header() {
       key: 'user-info',
       type: 'group',
       label: (
-        <div style={{ padding: '8px 0', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Avatar
-            src={user?.avatar}
-            size={48}
-            style={{
-              backgroundColor: '#14A800',
-              flexShrink: 0,
-            }}
-          >
-            {!user?.avatar && getUserDisplayName().charAt(0).toUpperCase()}
-          </Avatar>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <Text strong style={{ display: 'block', fontSize: '15px', lineHeight: 1.4 }}>
-              {getUserDisplayName()}
-            </Text>
-            <Text type="secondary" style={{ fontSize: '13px', lineHeight: 1.4 }}>
-              {user?.email || 'View profile'}
-            </Text>
+        <Link href={getProfilePath()} style={{ textDecoration: 'none', color: 'inherit' }}>
+          <div style={{ padding: '8px 0', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Avatar
+              src={user?.avatar}
+              size={48}
+              style={{
+                backgroundColor: '#14A800',
+                flexShrink: 0,
+              }}
+            >
+              {!user?.avatar && getUserDisplayName().charAt(0).toUpperCase()}
+            </Avatar>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <Text strong style={{ display: 'block', fontSize: '15px', lineHeight: 1.4 }}>
+                {getUserDisplayName()}
+              </Text>
+              <Text type="secondary" style={{ fontSize: '13px', lineHeight: 1.4 }}>
+                {user?.email || 'View profile'}
+              </Text>
+            </div>
           </div>
-        </div>
+        </Link>
       ),
     },
     { type: 'divider' },
+    {
+      key: 'dashboard',
+      label: (
+        <Link href={getDashboardPath()} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <DashboardOutlined />
+          <span>Dashboard</span>
+        </Link>
+      ),
+    },
+    {
+      key: 'my-profile',
+      label: (
+        <Link href={getProfilePath()} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <UserOutlined />
+          <span>My Profile</span>
+        </Link>
+      ),
+    },
     {
       key: 'premium',
       label: (
@@ -255,7 +290,7 @@ export function Header() {
             menu={{ items: userMenuItems }}
             placement="bottomRight"
             trigger={['click']}
-            overlayStyle={{ minWidth: 240 }}
+            styles={{ root: { minWidth: 240 } }}
           >
             <div
               style={{
